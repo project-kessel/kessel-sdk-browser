@@ -1,4 +1,4 @@
-# @redhat-cloud-services/access-checks
+# @redhat-cloud-services/frontend-kessel-access-checks
 
 A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities in your application.
 
@@ -8,7 +8,7 @@ A React SDK for performing granular and bulk access checks against the Kessel ac
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [API Reference](#api-reference)
-  - [AccessChecksProvider](#accesschecksprovider)
+  - [AccessCheck.Provider](#accesschecksprovider)
   - [useAccessCheck](#useaccesscheck)
   - [useBulkAccessCheck](#usebulkaccesscheck)
 - [Usage Examples](#usage-examples)
@@ -39,36 +39,36 @@ A React SDK for performing granular and bulk access checks against the Kessel ac
 ## Installation
 
 ```bash
-npm install @redhat-cloud-services/access-checks
+npm install @redhat-cloud-services/frontend-kessel-access-checks
 ```
 
 or
 
 ```bash
-yarn add @redhat-cloud-services/access-checks
+yarn add @redhat-cloud-services/frontend-kessel-access-checks
 ```
 
 or
 
 ```bash
-pnpm add @redhat-cloud-services/access-checks
+pnpm add @redhat-cloud-services/frontend-kessel-access-checks
 ```
 
 ## Quick Start
 
 ```jsx
 import React from 'react';
-import { AccessChecksProvider, useAccessCheck } from '@redhat-cloud-services/access-checks';
+import { AccessCheck, useAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 // 1. Wrap your application with the provider
 function App() {
   return (
-    <AccessChecksProvider
+    <AccessCheck.Provider
       baseUrl="https://console.redhat.com"
       apiPath="/api/inventory/v2"
     >
       <YourApplication />
-    </AccessChecksProvider>
+    </AccessCheck.Provider>
   );
 }
 
@@ -86,7 +86,7 @@ function InventoryGroupView() {
 
 ## API Reference
 
-### AccessChecksProvider
+### AccessCheck.Provider
 
 The main provider component that wraps your application and provides access check context to all child components.
 
@@ -101,12 +101,12 @@ The main provider component that wraps your application and provides access chec
 #### Example
 
 ```jsx
-<AccessChecksProvider
+<AccessCheck.Provider
   baseUrl="https://console.redhat.com"
   apiPath="/api/inventory/v2"
 >
   <App />
-</AccessChecksProvider>
+</AccessCheck.Provider>
 ```
 
 ### useAccessCheck
@@ -190,7 +190,7 @@ const workspacesWithDeleteAccess = workspaces.filter(
 Check if a user can view inventory groups:
 
 ```jsx
-import { useAccessCheck } from '@redhat-cloud-services/access-checks';
+import { useAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 function InventoryPage() {
   const canView = useAccessCheck('inventory_group_view');
@@ -210,7 +210,7 @@ function InventoryPage() {
 Check which workspaces a user can delete:
 
 ```jsx
-import { useBulkAccessCheck } from '@redhat-cloud-services/access-checks';
+import { useBulkAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 function WorkspaceList({ workspaces }) {
   const workspaceIds = workspaces.map(ws => ws.id);
@@ -236,7 +236,7 @@ function WorkspaceList({ workspaces }) {
 Show different UI based on permissions:
 
 ```jsx
-import { useAccessCheck } from '@redhat-cloud-services/access-checks';
+import { useAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 function ResourceActions() {
   const canCreate = useAccessCheck('resource_create');
@@ -265,7 +265,7 @@ function ResourceActions() {
 Filter a list to show only items the user can access:
 
 ```jsx
-import { useBulkAccessCheck } from '@redhat-cloud-services/access-checks';
+import { useBulkAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 function FilteredWorkspaceList({ allWorkspaces }) {
   const workspaceIds = allWorkspaces.map(ws => ws.id);
@@ -324,7 +324,7 @@ function WorkspaceManager({ workspaces }) {
 
 ### Default Configuration
 
-If no props are provided to `AccessChecksProvider`, it uses these defaults:
+If no props are provided to `AccessCheck.Provider`, it uses these defaults:
 
 - `baseUrl`: `window.location.origin`
 - `apiPath`: `'/api/inventory/v2'`
@@ -335,28 +335,28 @@ For different environments or custom API endpoints:
 
 ```jsx
 // Development
-<AccessChecksProvider
+<AccessCheck.Provider
   baseUrl="http://localhost:8000"
   apiPath="/api/v2"
 >
   <App />
-</AccessChecksProvider>
+</AccessCheck.Provider>
 
 // Production
-<AccessChecksProvider
+<AccessCheck.Provider
   baseUrl="https://console.redhat.com"
   apiPath="/api/inventory/v2"
 >
   <App />
-</AccessChecksProvider>
+</AccessCheck.Provider>
 
 // Environment-based
-<AccessChecksProvider
+<AccessCheck.Provider
   baseUrl={process.env.REACT_APP_API_URL}
   apiPath={process.env.REACT_APP_ACCESS_CHECK_PATH}
 >
   <App />
-</AccessChecksProvider>
+</AccessCheck.Provider>
 ```
 
 ## TypeScript Support
@@ -365,12 +365,12 @@ This package includes full TypeScript definitions.
 
 ```typescript
 import {
-  AccessChecksProvider,
+  AccessCheck.Provider,
   useAccessCheck,
   useBulkAccessCheck,
   AccessCheckResponse,
   BulkAccessCheckResponse
-} from '@redhat-cloud-services/access-checks';
+} from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 // Type definitions
 type AccessCheckResponse = boolean | undefined;
@@ -454,12 +454,12 @@ All requests include the user's JWT token in the Authorization header. The backe
 
 ## HCC-Specific Usage
 
-In Hybrid Cloud Console (HCC), the `AccessChecksProvider` is already configured in the common chroming layer. Applications don't need to wrap their components in the provider.
+In Hybrid Cloud Console (HCC), the `AccessCheck.Provider` is already configured in the common chroming layer. Applications don't need to wrap their components in the provider.
 
 Simply import and use the hooks:
 
 ```jsx
-import { useAccessCheck, useBulkAccessCheck } from '@redhat-cloud-services/access-checks';
+import { useAccessCheck, useBulkAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 function MyHCCApp() {
   const canView = useAccessCheck('inventory_group_view');
@@ -506,24 +506,24 @@ Access checks in the frontend provide UX improvements (hiding/disabling UI eleme
 
 ### 5. Minimize Provider Nesting
 
-Place the `AccessChecksProvider` as high as possible in your component tree, typically at the application root:
+Place the `AccessCheck.Provider` as high as possible in your component tree, typically at the application root:
 
 ```jsx
 // Good
-<AccessChecksProvider>
+<AccessCheck.Provider>
   <Router>
     <App />
   </Router>
-</AccessChecksProvider>
+</AccessCheck.Provider>
 
 // Avoid
 <Router>
-  <AccessChecksProvider>
+  <AccessCheck.Provider>
     <ComponentA />
-  </AccessChecksProvider>
-  <AccessChecksProvider>
+  </AccessCheck.Provider>
+  <AccessCheck.Provider>
     <ComponentB />
-  </AccessChecksProvider>
+  </AccessCheck.Provider>
 </Router>
 ```
 

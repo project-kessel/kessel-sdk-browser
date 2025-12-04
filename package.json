@@ -1,0 +1,34 @@
+{
+  "name": "@redhat-cloud-services/frontend-kessel-access-checks",
+  "version": "1.0.0",
+  "description": "A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities in your application.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react",
+    "kessel",
+    "access-checks",
+    "permissions",
+    "rbac",
+    "redhat"
+  ],
+  "author": "Red Hat Cloud Services",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.27",
+    "typescript": "^5.9.3"
+  }
+}
