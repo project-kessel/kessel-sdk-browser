@@ -1,4 +1,7 @@
+const { default: nxPreset } = require('@nx/jest/preset');
+
 module.exports = {
+  ...nxPreset,
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/src'],

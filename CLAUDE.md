@@ -32,6 +32,12 @@ This file provides context and guidelines for AI assistants working on this proj
 
 5. **Self-Service Only**: All access checks are performed on behalf of the authenticated user (no cross-user checks)
 
+6. **NX Build System**: Uses NX for build orchestration, intelligent caching, and task execution
+   - Caches build and test results for faster subsequent runs
+   - Provides consistent local and CI/CD experience
+   - Enables efficient monorepo-style tooling even in single-package setup
+   - Based on configuration from platform-frontend-ai-toolkit
+
 ### Current State
 
 **Note**: This is a barebones implementation. The components and hooks are scaffolded but contain minimal logic:
@@ -55,9 +61,14 @@ kessel-access-checks/
 ├── .github/
 │   └── workflows/
 │       └── pr-checks.yml          # CI/CD workflow
-├── eslint.config.mjs              # ESLint configuration
-├── jest.config.js                 # Jest configuration
+├── nx.json                        # NX workspace configuration
+├── project.json                   # NX project configuration
+├── jest.config.js                 # Jest configuration (extends NX preset)
+├── jest.preset.js                 # NX Jest preset
 ├── tsconfig.json                  # TypeScript configuration
+├── tsconfig.base.json             # Base TypeScript configuration
+├── tsconfig.spec.json             # TypeScript configuration for tests
+├── eslint.config.mjs              # ESLint configuration
 ├── package.json
 ├── README.md
 ├── LICENSE
@@ -110,16 +121,19 @@ Response: true
 ### Testing
 
 - **Framework**: Jest with React Testing Library
+- **Build Tool**: NX (provides caching and intelligent task execution)
 - **Coverage**: All exports should have basic tests
 - **Mocking**: Use `jest.spyOn` for console logs and future API calls
 - **Current Coverage**: 14 tests covering Provider and hooks
 
 **Run Tests**:
 ```bash
-npm test                 # Run all tests
+npm test                 # Run all tests with NX
 npm run test:watch       # Watch mode
 npm run test:coverage    # With coverage report
 ```
+
+**Note**: NX caches test results, so re-running tests without code changes will be instant.
 
 ### Linting
 
@@ -135,12 +149,14 @@ npm run lint:fix         # Auto-fix issues
 
 ### Building
 
-- **Tool**: TypeScript compiler (tsc)
+- **Build Tool**: NX with TypeScript compiler (tsc)
 - **Output**: `dist/` directory with .js and .d.ts files
+- **Caching**: NX caches builds for faster subsequent builds
 
 **Build**:
 ```bash
-npm run build
+npm run build            # Build with NX (cached)
+npm run typecheck        # Type check without emitting files
 ```
 
 ## CI/CD
@@ -156,17 +172,19 @@ npm run build
 **Jobs**:
 
 1. **build-and-test** (Matrix: Node 18.x, 20.x)
-   - Install dependencies
-   - Run linter
-   - Run tests
-   - Build package
+   - Install dependencies (including NX)
+   - Run linter via NX
+   - Run tests via NX
+   - Build package via NX
    - Verify build artifacts
 
 2. **test-coverage**
-   - Run tests with coverage
+   - Run tests with coverage via NX
    - Upload to Codecov (optional)
 
 All checks must pass before merging PRs.
+
+**Note**: NX is used for all build, test, and lint operations, providing consistent local and CI experiences with intelligent caching.
 
 ## Future Implementation Notes
 
@@ -225,6 +243,7 @@ The Provider should:
 3. **No Documentation Files**: Don't create additional .md files unless explicitly requested
 4. **Minimal Dependencies**: Avoid adding new dependencies unless necessary
 5. **Security**: Never commit secrets, always validate on backend
+6. **NX Tooling**: This project uses NX for build orchestration, caching, and task execution
 
 ## Access Check Naming Examples
 

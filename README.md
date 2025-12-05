@@ -563,12 +563,23 @@ npm install
 # Run tests
 npm test
 
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
 # Build the package
 npm run build
 
 # Run linter
 npm run lint
+
+# Type check
+npm run typecheck
 ```
+
+This project uses **NX** for build tooling, which provides intelligent caching and faster builds. NX will cache successful builds and tests, making subsequent runs significantly faster.
 
 ### Adding New Access Checks
 

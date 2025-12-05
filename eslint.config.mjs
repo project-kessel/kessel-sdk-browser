@@ -60,6 +60,7 @@ export default [
       'coverage/**',
       '*.config.js',
       'jest.config.js',
+      'jest.preset.js',
     ],
   },
 ];
