@@ -8,14 +8,15 @@ A React SDK for performing granular and bulk access checks against the Kessel ac
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [API Reference](#api-reference)
-  - [AccessCheck.Provider](#accesschecksprovider)
-  - [useAccessCheck](#useaccesscheck)
-  - [useBulkAccessCheck](#usebulkaccesscheck)
+  - [AccessCheck.Provider](#accesscheckprovider)
+  - [useSelfAccessCheck](#useselfaccesscheck)
 - [Usage Examples](#usage-examples)
-  - [Single Access Check](#single-access-check)
-  - [Bulk Access Check](#bulk-access-check)
+  - [Single Resource Check](#single-resource-check)
+  - [Bulk Resource Check - Same Relation](#bulk-resource-check---same-relation)
+  - [Bulk Resource Check - Nested Relations](#bulk-resource-check---nested-relations)
   - [Conditional Rendering](#conditional-rendering)
   - [Filtering Resources](#filtering-resources)
+  - [Using Consistency Tokens](#using-consistency-tokens)
 - [Configuration](#configuration)
 - [TypeScript Support](#typescript-support)
 - [Architecture](#architecture)
@@ -28,10 +29,12 @@ A React SDK for performing granular and bulk access checks against the Kessel ac
 
 ## Features
 
-- **Single Access Checks**: Verify if a user has any level of access to a specific permission
+- **Single Access Checks**: Verify if a user has a specific relation to a resource
 - **Bulk Access Checks**: Efficiently check permissions for multiple resources in a single request
+- **Nested Relations**: Support for checking different relations on different resources in a single bulk request
+- **Consistency Tokens**: Support for read-your-writes consistency guarantees
 - **React Context Integration**: Centralized, lifecycle-aware data layer with automatic caching and deduplication
-- **TypeScript Support**: Full type definitions for enhanced developer experience
+- **TypeScript Support**: Full type definitions with function overloads for enhanced developer experience
 - **Configurable**: Flexible configuration for base URL and API path
 - **Self-Service Checks Only**: All checks are performed on behalf of the authenticated user
 - **Framework Agnostic Backend**: Works with any REST API implementing the Kessel access check specification
@@ -58,14 +61,14 @@ pnpm add @redhat-cloud-services/frontend-kessel-access-checks
 
 ```jsx
 import React from 'react';
-import { AccessCheck, useAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { AccessCheck, useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 // 1. Wrap your application with the provider
 function App() {
   return (
     <AccessCheck.Provider
       baseUrl="https://console.redhat.com"
-      apiPath="/api/inventory/v2"
+      apiPath="/api/inventory/v1beta2"
     >
       <YourApplication />
     </AccessCheck.Provider>
@@ -73,14 +76,21 @@ function App() {
 }
 
 // 2. Use the hook in your components
-function InventoryGroupView() {
-  const canViewInventory = useAccessCheck('inventory_group_view');
+function WorkspaceView({ workspaceId }) {
+  const { data, loading, error } = useSelfAccessCheck({
+    relation: 'view',
+    resource: { id: workspaceId, type: 'workspace' }
+  });
 
-  if (!canViewInventory) {
-    return <div>You don't have permission to view inventory groups.</div>;
+  if (loading) {
+    return <Spinner />;
   }
 
-  return <div>Inventory Groups List...</div>;
+  if (!data?.allowed) {
+    return <div>You don't have permission to view this workspace.</div>;
+  }
+
+  return <div>Workspace Content...</div>;
 }
 ```
 
@@ -95,7 +105,7 @@ The main provider component that wraps your application and provides access chec
 | Prop | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
 | `baseUrl` | `string` | No | `window.location.origin` | The base URL for the API server |
-| `apiPath` | `string` | No | `'/api/inventory/v2'` | The base path for the access check API endpoints |
+| `apiPath` | `string` | No | `'/api/inventory/v1beta2'` | The base path for the access check API endpoints |
 | `children` | `ReactNode` | Yes | - | Child components that will have access to the access check hooks |
 
 #### Example
@@ -103,130 +113,236 @@ The main provider component that wraps your application and provides access chec
 ```jsx
 <AccessCheck.Provider
   baseUrl="https://console.redhat.com"
-  apiPath="/api/inventory/v2"
+  apiPath="/api/inventory/v1beta2"
 >
   <App />
 </AccessCheck.Provider>
 ```
 
-### useAccessCheck
+### useSelfAccessCheck
 
-Hook for checking if the current user has any level of access to a specified permission.
+Hook for checking if the current user has the specified relation(s) to resource(s). Supports three overloads for different use cases.
 
-#### Signature
+#### Overload 1: Single Resource Check
 
+Check if the user has a specific relation to a single resource.
+
+**Signature**
 ```typescript
-function useAccessCheck(accessCheck: string): boolean | undefined
+function useSelfAccessCheck(params: {
+  relation: string;
+  resource: {
+    id: string;
+    type: string;
+    [key: string]: unknown;
+  };
+}): {
+  data?: {
+    allowed: boolean;
+    resource: SelfAccessCheckResource;
+  };
+  loading: boolean;
+  error?: SelfAccessCheckError;
+}
 ```
 
-#### Parameters
-
-- `accessCheck` (string): The name of the permission to check (e.g., `'inventory_group_view'`, `'workspaces_delete'`)
-
-#### Returns
-
-- `true` if the user has the permission
-- `false` if the user does not have the permission
-- `undefined` while the check is loading
-
-#### Example
-
+**Example**
 ```jsx
-const canDelete = useAccessCheck('workspaces_delete');
+const { data, loading, error } = useSelfAccessCheck({
+  relation: 'delete',
+  resource: { id: 'ws-123', type: 'workspace' }
+});
 
-if (canDelete === undefined) {
-  return <Spinner />;
-}
+if (loading) return <Spinner />;
+if (error) return <ErrorMessage />;
 
 return (
-  <Button disabled={!canDelete}>
+  <Button disabled={!data?.allowed}>
     Delete Workspace
   </Button>
 );
 ```
 
-### useBulkAccessCheck
+#### Overload 2: Bulk Resource Check - Same Relation
 
-Hook for checking permissions for multiple resources in a single request. Returns the list of resource IDs where the check is true.
+Check the same relation across multiple resources.
 
-#### Signature
-
+**Signature**
 ```typescript
-function useBulkAccessCheck(
-  accessCheck: string,
-  resourceIDs: string[]
-): string[] | undefined
+function useSelfAccessCheck(params: {
+  relation: string;
+  resources: [
+    { id: string; type: string; [key: string]: unknown },
+    ...Array<{ id: string; type: string; [key: string]: unknown }>
+  ];
+  options?: {
+    consistency?: {
+      minimizeLatency?: boolean;
+      atLeastAsFresh?: { token: string };
+    };
+  };
+}): {
+  data?: Array<{
+    allowed: boolean;
+    resource: SelfAccessCheckResource;
+    relation: string;
+    error?: SelfAccessCheckError;
+  }>;
+  loading: boolean;
+  error?: SelfAccessCheckError;
+  consistencyToken?: { token: string };
+}
 ```
 
-#### Parameters
-
-- `accessCheck` (string): The name of the permission to check
-- `resourceIDs` (string[]): Array of resource UUIDs to check (e.g., workspace IDs, group IDs)
-
-#### Returns
-
-- `string[]`: Array of resource IDs where the permission check is true
-- `undefined` while the check is loading
-
-#### Example
-
+**Example**
 ```jsx
-const workspaceIds = ['ws-1', 'ws-2', 'ws-3', 'ws-4'];
-const deletableWorkspaces = useBulkAccessCheck('workspaces_delete', workspaceIds);
+const { data: checks, loading } = useSelfAccessCheck({
+  relation: 'delete',
+  resources: [
+    { id: 'ws-1', type: 'workspace' },
+    { id: 'ws-2', type: 'workspace' },
+    { id: 'ws-3', type: 'workspace' }
+  ]
+});
 
-if (deletableWorkspaces === undefined) {
-  return <Spinner />;
+const deletableWorkspaces = checks
+  ?.filter(check => check.allowed)
+  .map(check => check.resource);
+```
+
+#### Overload 3: Bulk Resource Check - Nested Relations
+
+Check different relations on different resources in a single request.
+
+**Signature**
+```typescript
+function useSelfAccessCheck(params: {
+  resources: [
+    { id: string; type: string; relation: string; [key: string]: unknown },
+    ...Array<{ id: string; type: string; relation: string; [key: string]: unknown }>
+  ];
+  options?: {
+    consistency?: {
+      minimizeLatency?: boolean;
+      atLeastAsFresh?: { token: string };
+    };
+  };
+}): {
+  data?: Array<{
+    allowed: boolean;
+    resource: SelfAccessCheckResource;
+    relation: string;
+    error?: SelfAccessCheckError;
+  }>;
+  loading: boolean;
+  error?: SelfAccessCheckError;
+  consistencyToken?: { token: string };
 }
+```
 
-const workspacesWithDeleteAccess = workspaces.filter(
-  ws => deletableWorkspaces.includes(ws.id)
-);
+**Example**
+```jsx
+const { data: checks, loading } = useSelfAccessCheck({
+  resources: [
+    { id: 'ws-1', type: 'workspace', relation: 'delete' },
+    { id: 'ws-2', type: 'workspace', relation: 'view' },
+    { id: 'ws-3', type: 'workspace', relation: 'edit' }
+  ]
+});
+
+// Find any errors in the bulk check
+const errors = checks?.filter(check => check.error);
 ```
 
 ## Usage Examples
 
-### Single Access Check
+### Single Resource Check
 
-Check if a user can view inventory groups:
+Check if a user can delete a specific workspace:
 
 ```jsx
-import { useAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
-function InventoryPage() {
-  const canView = useAccessCheck('inventory_group_view');
-  const canUpdate = useAccessCheck('inventory_group_update');
+function WorkspaceActions({ workspaceId }) {
+  const { data: deleteCheck, loading } = useSelfAccessCheck({
+    relation: 'delete',
+    resource: { id: workspaceId, type: 'workspace' }
+  });
+
+  if (loading) return <Spinner />;
 
   return (
     <div>
-      {canView && <InventoryList />}
-      {canUpdate && <EditButton />}
+      <Button disabled={!deleteCheck?.allowed}>
+        Delete Workspace
+      </Button>
     </div>
   );
 }
 ```
 
-### Bulk Access Check
+### Bulk Resource Check - Same Relation
 
 Check which workspaces a user can delete:
 
 ```jsx
-import { useBulkAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 function WorkspaceList({ workspaces }) {
-  const workspaceIds = workspaces.map(ws => ws.id);
-  const deletableIds = useBulkAccessCheck('workspaces_delete', workspaceIds);
+  const { data: deleteChecks, loading } = useSelfAccessCheck({
+    relation: 'delete',
+    resources: workspaces.map(ws => ({ id: ws.id, type: 'workspace' }))
+  });
+
+  if (loading) return <Spinner />;
 
   return (
     <ul>
-      {workspaces.map(workspace => (
-        <li key={workspace.id}>
-          {workspace.name}
-          <DeleteButton
-            disabled={!deletableIds?.includes(workspace.id)}
-          />
-        </li>
-      ))}
+      {workspaces.map(workspace => {
+        const canDelete = deleteChecks?.find(
+          check => check.resource.id === workspace.id
+        )?.allowed;
+
+        return (
+          <li key={workspace.id}>
+            {workspace.name}
+            <DeleteButton disabled={!canDelete} />
+          </li>
+        );
+      })}
     </ul>
+  );
+}
+```
+
+### Bulk Resource Check - Nested Relations
+
+Check multiple different permissions in a single request:
+
+```jsx
+import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+
+function WorkspacePermissions({ workspaceId }) {
+  const { data: checks, loading } = useSelfAccessCheck({
+    resources: [
+      { id: workspaceId, type: 'workspace', relation: 'view' },
+      { id: workspaceId, type: 'workspace', relation: 'edit' },
+      { id: workspaceId, type: 'workspace', relation: 'delete' }
+    ]
+  });
+
+  if (loading) return <Spinner />;
+
+  const canView = checks?.find(c => c.relation === 'view')?.allowed;
+  const canEdit = checks?.find(c => c.relation === 'edit')?.allowed;
+  const canDelete = checks?.find(c => c.relation === 'delete')?.allowed;
+
+  return (
+    <div>
+      <p>View: {canView ? '✓' : '✗'}</p>
+      <p>Edit: {canEdit ? '✓' : '✗'}</p>
+      <p>Delete: {canDelete ? '✓' : '✗'}</p>
+    </div>
   );
 }
 ```
@@ -236,25 +352,33 @@ function WorkspaceList({ workspaces }) {
 Show different UI based on permissions:
 
 ```jsx
-import { useAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
-function ResourceActions() {
-  const canCreate = useAccessCheck('resource_create');
-  const canDelete = useAccessCheck('resource_delete');
-  const canUpdate = useAccessCheck('resource_update');
+function ResourceActions({ resourceId, resourceType }) {
+  const { data: checks, loading } = useSelfAccessCheck({
+    resources: [
+      { id: resourceId, type: resourceType, relation: 'view' },
+      { id: resourceId, type: resourceType, relation: 'edit' },
+      { id: resourceId, type: resourceType, relation: 'delete' }
+    ]
+  });
 
-  if (canCreate === undefined) {
-    return <Spinner />;
+  if (loading) return <Spinner />;
+
+  const canView = checks?.find(c => c.relation === 'view')?.allowed;
+  const canEdit = checks?.find(c => c.relation === 'edit')?.allowed;
+  const canDelete = checks?.find(c => c.relation === 'delete')?.allowed;
+
+  if (!canView) {
+    return <div>You don't have permission to view this resource.</div>;
   }
 
   return (
     <div>
-      {canCreate && <CreateButton />}
-      {canUpdate && <EditButton />}
+      <ViewContent />
+      {canEdit && <EditButton />}
       {canDelete && <DeleteButton />}
-      {!canCreate && !canUpdate && !canDelete && (
-        <div>Read-only access</div>
-      )}
+      {!canEdit && !canDelete && <div>Read-only access</div>}
     </div>
   );
 }
@@ -265,18 +389,18 @@ function ResourceActions() {
 Filter a list to show only items the user can access:
 
 ```jsx
-import { useBulkAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
 function FilteredWorkspaceList({ allWorkspaces }) {
-  const workspaceIds = allWorkspaces.map(ws => ws.id);
-  const viewableIds = useBulkAccessCheck('workspaces_view', workspaceIds);
+  const { data: viewChecks, loading } = useSelfAccessCheck({
+    relation: 'view',
+    resources: allWorkspaces.map(ws => ({ id: ws.id, type: 'workspace' }))
+  });
 
-  if (viewableIds === undefined) {
-    return <Spinner />;
-  }
+  if (loading) return <Spinner />;
 
-  const visibleWorkspaces = allWorkspaces.filter(
-    ws => viewableIds.includes(ws.id)
+  const visibleWorkspaces = allWorkspaces.filter(ws =>
+    viewChecks?.find(check => check.resource.id === ws.id)?.allowed
   );
 
   return (
@@ -290,33 +414,35 @@ function FilteredWorkspaceList({ allWorkspaces }) {
 }
 ```
 
-### Helper Function for Mapping
+### Using Consistency Tokens
 
-When using bulk checks, you may want to map results back to resources:
+Ensure read-your-writes consistency after making changes:
 
 ```jsx
-// Helper function to filter resources based on bulk check results
-function filterByAccess(resources, resourceIds, allowedIds) {
-  return resources.filter((_, index) => allowedIds.includes(resourceIds[index]));
-}
+import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
-// Usage
 function WorkspaceManager({ workspaces }) {
-  const ids = workspaces.map(ws => ws.id);
-  const deletableIds = useBulkAccessCheck('workspaces_delete', ids);
+  const [consistencyToken, setConsistencyToken] = useState();
 
-  if (!deletableIds) return <Spinner />;
+  const { data: checks, consistencyToken: newToken } = useSelfAccessCheck({
+    relation: 'edit',
+    resources: workspaces.map(ws => ({ id: ws.id, type: 'workspace' })),
+    options: {
+      consistency: {
+        minimizeLatency: false,
+        ...(consistencyToken && { atLeastAsFresh: { token: consistencyToken } })
+      }
+    }
+  });
 
-  const deletableWorkspaces = workspaces.filter(ws =>
-    deletableIds.includes(ws.id)
-  );
+  // Save token for next request
+  useEffect(() => {
+    if (newToken) {
+      setConsistencyToken(newToken.token);
+    }
+  }, [newToken]);
 
-  return (
-    <div>
-      <h3>Deletable Workspaces: {deletableWorkspaces.length}</h3>
-      {/* ... */}
-    </div>
-  );
+  // ... rest of component
 }
 ```
 
@@ -327,7 +453,7 @@ function WorkspaceManager({ workspaces }) {
 If no props are provided to `AccessCheck.Provider`, it uses these defaults:
 
 - `baseUrl`: `window.location.origin`
-- `apiPath`: `'/api/inventory/v2'`
+- `apiPath`: `'/api/inventory/v1beta2'`
 
 ### Custom Configuration
 
@@ -337,7 +463,7 @@ For different environments or custom API endpoints:
 // Development
 <AccessCheck.Provider
   baseUrl="http://localhost:8000"
-  apiPath="/api/v2"
+  apiPath="/api/inventory/v1beta2"
 >
   <App />
 </AccessCheck.Provider>
@@ -345,7 +471,7 @@ For different environments or custom API endpoints:
 // Production
 <AccessCheck.Provider
   baseUrl="https://console.redhat.com"
-  apiPath="/api/inventory/v2"
+  apiPath="/api/inventory/v1beta2"
 >
   <App />
 </AccessCheck.Provider>
@@ -361,36 +487,75 @@ For different environments or custom API endpoints:
 
 ## TypeScript Support
 
-This package includes full TypeScript definitions.
+This package includes full TypeScript definitions with function overloads.
 
 ```typescript
 import {
-  AccessCheck.Provider,
-  useAccessCheck,
-  useBulkAccessCheck,
-  AccessCheckResponse,
-  BulkAccessCheckResponse
+  AccessCheck,
+  useSelfAccessCheck,
+  // Types
+  SelfAccessCheckResource,
+  SelfAccessCheckParams,
+  BulkSelfAccessCheckParams,
+  BulkSelfAccessCheckNestedRelationsParams,
+  SelfAccessCheckResult,
+  BulkSelfAccessCheckResult,
+  SelfAccessCheckError
 } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
-// Type definitions
-type AccessCheckResponse = boolean | undefined;
-type BulkAccessCheckResponse = string[] | undefined;
+// Resource type
+const resource: SelfAccessCheckResource = {
+  id: 'ws-123',
+  type: 'workspace',
+  // Can include additional properties
+  name: 'My Workspace'
+};
 
-// Typed usage
-const canDelete: AccessCheckResponse = useAccessCheck('workspaces_delete');
-const deletableIds: BulkAccessCheckResponse = useBulkAccessCheck(
-  'workspaces_delete',
-  ['id1', 'id2', 'id3']
-);
+// Single check
+const singleCheck: SelfAccessCheckResult = useSelfAccessCheck({
+  relation: 'delete',
+  resource
+});
+
+// Bulk check - same relation
+const bulkCheck: BulkSelfAccessCheckResult = useSelfAccessCheck({
+  relation: 'view',
+  resources: [
+    { id: 'id1', type: 'workspace' },
+    { id: 'id2', type: 'workspace' }
+  ]
+});
+
+// Bulk check - nested relations
+const nestedCheck: BulkSelfAccessCheckResult = useSelfAccessCheck({
+  resources: [
+    { id: 'id1', type: 'workspace', relation: 'delete' },
+    { id: 'id2', type: 'workspace', relation: 'edit' }
+  ]
+});
 ```
+
+### Available Types
+
+- `NotEmptyArray<T>` - Array with at least one element
+- `SelfAccessCheckResource` - Resource object with id and type
+- `SelfAccessCheckResourceWithRelation` - Resource with embedded relation
+- `SelfAccessCheckError` - Error object structure
+- `SelfAccessCheckParams` - Parameters for single resource check
+- `BulkSelfAccessCheckParams` - Parameters for bulk same-relation check
+- `BulkSelfAccessCheckNestedRelationsParams` - Parameters for bulk nested-relations check
+- `SelfAccessCheckResultItem` - Result item for single check
+- `SelfAccessCheckResultItemWithRelation` - Result item for bulk checks
+- `SelfAccessCheckResult` - Return type for single check
+- `BulkSelfAccessCheckResult` - Return type for bulk checks
 
 ## Architecture
 
 This SDK uses a Provider/Context pattern for several key benefits:
 
 - **Centralized Data Layer**: Single source of truth for access checks across your application
-- **Automatic Caching**: Prevents duplicate requests for the same permission checks
-- **Request Deduplication**: Multiple components can request the same check without triggering multiple API calls
+- **Automatic Caching**: Prevents duplicate requests for the same permission checks (planned)
+- **Request Deduplication**: Multiple components can request the same check without triggering multiple API calls (planned)
 - **Lifecycle Awareness**: Automatically handles component mounting/unmounting
 - **React Integration**: Works seamlessly with Error Boundaries, Suspense, and other React features
 - **Reduced Prop Drilling**: Access hooks from any component without passing props through the tree
@@ -400,7 +565,7 @@ This SDK uses a Provider/Context pattern for several key benefits:
 The Provider/Context with hooks approach is preferred over direct async functions because it:
 
 1. Integrates cleanly with React's lifecycle (avoids setState on unmounted components)
-2. Provides automatic caching and deduplication
+2. Provides automatic caching and deduplication (when implemented)
 3. Centralizes cross-cutting concerns (auth headers, retries, error handling, telemetry)
 4. Supports SSR/SSG via cache hydration
 5. Improves testability by swapping providers in unit tests
@@ -415,37 +580,101 @@ Direct async functions are better suited for:
 
 This SDK expects the backend to implement two REST endpoints:
 
-### Single Access Check
+### Self Access Check
 
-**GET** `/api/inventory/v2/accesscheck?check=<name_of_check>`
+**POST** `/api/inventory/v1beta2/checkself`
 
-**Response**: `true` or `false`
+Checks if the current user has the specified level of access to the provided resource.
 
-Example:
-```
-GET /api/inventory/v2/accesscheck?check=inventory_group_view
-Response: true
-```
-
-### Bulk Access Check
-
-**POST** `/api/inventory/v2/accesscheck/<name_of_check>`
-
-**Request Body**: Array of resource UUIDs
+**Request Body**:
 ```json
-["uuid-1", "uuid-2", "uuid-3"]
+{
+  "object": {
+    "resourceId": "e07f0bbd-4743-404f-8dca-14d92026b52c",
+    "resourceType": "workspace"
+  },
+  "relation": "view"
+}
 ```
 
-**Response**: Array of UUIDs where check is true
+**Response**:
 ```json
-["uuid-1", "uuid-3"]
+{
+  "allowed": "ALLOWED_TRUE"
+}
 ```
 
-Example:
+Allowed values: `ALLOWED_UNSPECIFIED`, `ALLOWED_TRUE`, or `ALLOWED_FALSE`
+
+### Bulk Self Access Check
+
+**POST** `/api/inventory/v1beta2/checkselfbulk`
+
+Checks if the current user has the specified level of access to multiple resources.
+
+**Request Body**:
+```json
+{
+  "items": [
+    {
+      "object": {
+        "resourceId": "3f2a1c9e-5b6d-4a1f-8c3b-2d7e9f01a2b3",
+        "resourceType": "workspace"
+      },
+      "relation": "delete"
+    },
+    {
+      "object": {
+        "resourceId": "a8d4c2f1-9e0b-4d59-8a7e-3c1d5f6b8e90",
+        "resourceType": "workspace"
+      },
+      "relation": "view"
+    }
+  ],
+  "consistency": {
+    "minimizeLatency": true
+  }
+}
 ```
-POST /api/inventory/v2/accesscheck/workspaces_delete
-Body: ["ws-1", "ws-2", "ws-3"]
-Response: ["ws-1", "ws-3"]
+
+**Response**:
+```json
+{
+  "pairs": [
+    {
+      "request": {
+        "object": {
+          "resourceId": "3f2a1c9e-5b6d-4a1f-8c3b-2d7e9f01a2b3",
+          "resourceType": "workspace"
+        },
+        "relation": "delete"
+      },
+      "item": {
+        "allowed": "ALLOWED_TRUE"
+      }
+    },
+    {
+      "request": {
+        "object": {
+          "resourceId": "a8d4c2f1-9e0b-4d59-8a7e-3c1d5f6b8e90",
+          "resourceType": "workspace"
+        },
+        "relation": "view"
+      },
+      "item": {
+        "allowed": "ALLOWED_FALSE"
+      },
+      "error": {
+        "code": 403,
+        "message": "Access denied",
+        "details": []
+      }
+    }
+  ],
+  "consistencyToken": {
+    "token": "ZGVhZGJlZWY="
+  }
+}
 ```
 
 ### Authentication
@@ -459,12 +688,15 @@ In Hybrid Cloud Console (HCC), the `AccessCheck.Provider` is already configured 
 Simply import and use the hooks:
 
 ```jsx
-import { useAccessCheck, useBulkAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
 
-function MyHCCApp() {
-  const canView = useAccessCheck('inventory_group_view');
+function MyHCCApp({ workspaceId }) {
+  const { data, loading } = useSelfAccessCheck({
+    relation: 'view',
+    resource: { id: workspaceId, type: 'workspace' }
+  });
 
-  return <div>{canView && <InventoryContent />}</div>;
+  return <div>{data?.allowed && <WorkspaceContent />}</div>;
 }
 ```
 
@@ -472,39 +704,61 @@ function MyHCCApp() {
 
 ### 1. Handle Loading States
 
-Always handle the `undefined` state while checks are loading:
+Always handle the loading state while checks are in progress:
 
 ```jsx
-const canDelete = useAccessCheck('resource_delete');
+const { data, loading, error } = useSelfAccessCheck({
+  relation: 'delete',
+  resource: { id: resourceId, type: 'workspace' }
+});
 
-if (canDelete === undefined) {
-  return <Spinner />;
-}
+if (loading) return <Spinner />;
+if (error) return <ErrorMessage error={error} />;
 ```
 
 ### 2. Use Bulk Checks for Multiple Resources
 
-When checking the same permission across multiple resources, always use `useBulkAccessCheck`:
+When checking the same permission across multiple resources, always use the bulk form:
 
 ```jsx
 // Good
-const deletableIds = useBulkAccessCheck('delete', resourceIds);
+const { data: checks } = useSelfAccessCheck({
+  relation: 'delete',
+  resources: workspaces.map(ws => ({ id: ws.id, type: 'workspace' }))
+});
 
 // Avoid - triggers multiple API calls
-resourceIds.forEach(id => {
-  const canDelete = useAccessCheck(`delete_${id}`); // Don't do this
+workspaces.forEach(ws => {
+  const { data } = useSelfAccessCheck({
+    relation: 'delete',
+    resource: { id: ws.id, type: 'workspace' }
+  });
 });
 ```
 
-### 3. Access Checks Are Self-Service Only
+### 3. Use Nested Relations for Different Permissions
+
+When checking multiple different permissions, use nested relations:
+
+```jsx
+const { data: checks } = useSelfAccessCheck({
+  resources: [
+    { id: wsId, type: 'workspace', relation: 'view' },
+    { id: wsId, type: 'workspace', relation: 'edit' },
+    { id: wsId, type: 'workspace', relation: 'delete' }
+  ]
+});
+```
+
+### 4. Access Checks Are Self-Service Only
 
 All checks are performed for the currently authenticated user. You cannot check permissions on behalf of other users.
 
-### 4. Frontend Checks Are Not Security
+### 5. Frontend Checks Are Not Security
 
 Access checks in the frontend provide UX improvements (hiding/disabling UI elements). Always enforce permissions on the backend when performing actual operations.
 
-### 5. Minimize Provider Nesting
+### 6. Minimize Provider Nesting
 
 Place the `AccessCheck.Provider` as high as possible in your component tree, typically at the application root:
 
@@ -527,15 +781,29 @@ Place the `AccessCheck.Provider` as high as possible in your component tree, typ
 </Router>
 ```
 
-### 6. Check Naming Convention
+### 7. Resource Types and Relations
 
-Use clear, descriptive check names following the pattern: `<resource>_<action>`
+**Resource Types**: `workspace`, `group`, `inventory_group`, etc.
 
-Examples:
-- `inventory_group_view`
-- `inventory_group_update`
-- `workspaces_delete`
-- `workspaces_create`
+**Relations**: `view`, `edit`, `delete`, `create`, `move`, `rename`, `role_bindings_view`, `role_bindings_grant`, `role_bindings_revoke`, etc.
+
+Resources are objects with `id` and `type` properties, and can include additional metadata.
+
+### 8. Handle Per-Item Errors
+
+When using bulk checks, check for per-item errors:
+
+```jsx
+const { data: checks } = useSelfAccessCheck({
+  relation: 'delete',
+  resources: workspaces.map(ws => ({ id: ws.id, type: 'workspace' }))
+});
+
+const errors = checks?.filter(check => check.error);
+if (errors?.length) {
+  console.error('Some checks failed:', errors);
+}
+```
 
 ## Contributing
 
@@ -580,15 +848,6 @@ npm run typecheck
 ```
 
 This project uses **NX** for build tooling, which provides intelligent caching and faster builds. NX will cache successful builds and tests, making subsequent runs significantly faster.
-
-### Adding New Access Checks
-
-Access checks are defined in the backend API repository. To propose a new check:
-
-1. Submit a request to the backend team with the check name and description
-2. Follow the naming convention: `<resource>_<action>`
-3. Ensure the check name is URL-safe
-4. Document the check's purpose and use cases
 
 ## License
 

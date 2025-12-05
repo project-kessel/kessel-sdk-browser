@@ -42,9 +42,9 @@ This file provides context and guidelines for AI assistants working on this proj
 
 **Note**: This is a barebones implementation. The components and hooks are scaffolded but contain minimal logic:
 
-- `AccessCheck.Provider`: Renders children only, no context implementation yet
-- `useAccessCheck`: Returns `undefined` and logs to console
-- `useBulkAccessCheck`: Returns `undefined` and logs to console
+- `AccessCheck.Provider`: Renders children only, accepts `baseUrl` and `apiPath` props, no context implementation yet
+- `useSelfAccessCheck`: Returns `{ data: undefined, loading: false, error: undefined }` structure and logs to console
+  - Supports three overloads: single resource check, bulk same-relation check, and bulk nested-relations check
 
 ## Project Structure
 
@@ -55,6 +55,7 @@ kessel-access-checks/
 │   ├── AccessCheckProvider.test.tsx
 │   ├── hooks.ts                   # Access check hooks (barebones)
 │   ├── hooks.test.tsx
+│   ├── types.ts                   # TypeScript type definitions
 │   ├── setupTests.ts              # Jest setup
 │   └── index.ts                   # Main exports
 ├── dist/                          # Compiled output (generated)
@@ -79,28 +80,99 @@ kessel-access-checks/
 
 This SDK is designed to work with two REST endpoints (not yet implemented in the frontend):
 
-### 1. Single Access Check
-**GET** `/api/inventory/v2/accesscheck?check=<name_of_check>`
+### 1. Self Access Check
+**POST** `/api/inventory/v1beta2/checkself`
 
-**Response**: `true` or `false`
+Checks if the current user has the specified level of access to the provided resource.
 
-**Example**:
-```
-GET /api/inventory/v2/accesscheck?check=inventory_group_view
-Response: true
-```
-
-### 2. Bulk Access Check
-**POST** `/api/inventory/v2/accesscheck/<name_of_check>`
-
-**Request Body**: Array of resource UUIDs
+**Request Body**:
 ```json
-["uuid-1", "uuid-2", "uuid-3"]
+{
+  "object": {
+    "resourceId": "e07f0bbd-4743-404f-8dca-14d92026b52c",
+    "resourceType": "workspace"
+  },
+  "relation": "view"
+}
 ```
 
-**Response**: Array of UUIDs where check is true
+**Response**:
 ```json
-["uuid-1", "uuid-3"]
+{
+  "allowed": "ALLOWED_TRUE"
+}
+```
+
+**Allowed values**: `ALLOWED_UNSPECIFIED`, `ALLOWED_TRUE`, or `ALLOWED_FALSE`
+
+### 2. Bulk Self Access Check
+**POST** `/api/inventory/v1beta2/checkselfbulk`
+
+Checks if the current user has the specified level of access to multiple resources.
+
+**Request Body**:
+```json
+{
+  "items": [
+    {
+      "object": {
+        "resourceId": "3f2a1c9e-5b6d-4a1f-8c3b-2d7e9f01a2b3",
+        "resourceType": "workspace"
+      },
+      "relation": "delete"
+    },
+    {
+      "object": {
+        "resourceId": "a8d4c2f1-9e0b-4d59-8a7e-3c1d5f6b8e90",
+        "resourceType": "workspace"
+      },
+      "relation": "view"
+    }
+  ],
+  "consistency": {
+    "minimizeLatency": true
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "pairs": [
+    {
+      "request": {
+        "object": {
+          "resourceId": "3f2a1c9e-5b6d-4a1f-8c3b-2d7e9f01a2b3",
+          "resourceType": "workspace"
+        },
+        "relation": "delete"
+      },
+      "item": {
+        "allowed": "ALLOWED_TRUE"
+      }
+    },
+    {
+      "request": {
+        "object": {
+          "resourceId": "a8d4c2f1-9e0b-4d59-8a7e-3c1d5f6b8e90",
+          "resourceType": "workspace"
+        },
+        "relation": "view"
+      },
+      "item": {
+        "allowed": "ALLOWED_FALSE"
+      },
+      "error": {
+        "code": 403,
+        "message": "Access denied",
+        "details": []
+      }
+    }
+  ],
+  "consistencyToken": {
+    "token": "ZGVhZGJlZWY="
+  }
+}
 ```
 
 ## Development Guidelines
@@ -114,7 +186,8 @@ Response: true
    - Use TypeScript for prop validation (not PropTypes)
 3. **Console Logs**: Allowed in the current barebones implementation
 4. **Naming**:
-   - Check names follow pattern: `<resource>_<action>` (e.g., `inventory_group_view`, `workspaces_delete`)
+   - Resources: objects with `id` and `type` properties (e.g., `{ id: 'uuid', type: 'workspace' }`)
+   - Relations: simple strings (e.g., `'view'`, `'edit'`, `'delete'`, `'role_bindings_view'`)
    - Use camelCase for variables and functions
    - Use PascalCase for components
 
@@ -124,7 +197,7 @@ Response: true
 - **Build Tool**: NX (provides caching and intelligent task execution)
 - **Coverage**: All exports should have basic tests
 - **Mocking**: Use `jest.spyOn` for console logs and future API calls
-- **Current Coverage**: 14 tests covering Provider and hooks
+- **Current Coverage**: 18 tests covering Provider and hooks
 
 **Run Tests**:
 ```bash
@@ -194,38 +267,63 @@ When implementing the actual functionality:
 
 The Provider should:
 - Create a React Context for access check state
-- Accept `baseUrl` and `apiPath` props (with defaults)
-- Store authentication tokens from headers
-- Implement request caching/deduplication
+- Accept `baseUrl` and `apiPath` props (with defaults, default apiPath: `/api/inventory/v1beta2`)
+- Store authentication tokens from headers (JWT)
+- Implement caching by resource type, id, and relation with TTL
+- Implement request deduplication (dedupe identical type, id, relation entries)
 - Handle loading and error states
+- Manage consistency tokens for read-your-writes guarantees
 
 ### 2. Hook Implementation
 
-**useAccessCheck**:
-- Make GET request to `/api/inventory/v2/accesscheck?check={name}`
-- Return boolean or undefined (while loading)
-- Cache results to prevent duplicate requests
-- Handle errors gracefully
+**useSelfAccessCheck** (three overloads):
 
-**useBulkAccessCheck**:
-- Make POST request to `/api/inventory/v2/accesscheck/{name}`
-- Send array of resource IDs in request body
-- Return array of IDs where check is true, or undefined (while loading)
-- Cache results based on check name + resource IDs
+**Overload 1 - Single Resource Check**:
+- Make POST request to `/api/inventory/v1beta2/checkself`
+- Send `{ object: { resourceId, resourceType }, relation }` in request body
+- Map response `allowed` enum to boolean (`ALLOWED_TRUE` → `true`, others → `false`)
+- Return `{ data: { allowed: boolean, resource }, loading, error }`
+- Cache results to prevent duplicate requests
+
+**Overload 2 - Bulk Same Relation**:
+- Make POST request to `/api/inventory/v1beta2/checkselfbulk`
+- Send `{ items: [{ object, relation }], consistency }` in request body
+- Handle automatic chunking if resources array > 1000 items (backend max limit)
+- Preserve order when chunking
+- Deduplicate identical entries (type, id, relation) before sending
+- Map response pairs to `{ allowed: boolean, resource, relation, error? }`
+- Return `{ data: array, loading, error, consistencyToken }`
+
+**Overload 3 - Bulk Nested Relations**:
+- Same as Overload 2, but each resource has its own `relation` property
+- Each item in request body gets relation from resource object
+
+**All overloads should**:
+- Handle per-item errors in bulk responses
+- Support consistency options (`minimizeLatency`, `atLeastAsFresh.token`)
+- Extract and store consistency tokens for subsequent requests
+- Implement request cancellation for unmounted components
+- Cache results based on resource type + id + relation
 
 ### 3. Error Handling
 
 - Network errors should be caught and logged
-- Invalid check names should warn in development
+- Per-item errors in bulk responses should be included in result data
+- Invalid resource types or relations should warn in development
 - Failed requests should not crash the application
 - Consider retry logic for transient failures
+- Structured error objects: `{ code, message, details }`
 
 ### 4. Performance Considerations
 
 - Debounce rapid consecutive checks
-- Batch multiple checks when possible
+- Automatic chunking for bulk requests exceeding backend limit (1000 items)
+- Deduplicate identical checks before sending to backend
+- Cache results by (type, id, relation) with configurable TTL
 - Consider using React Query or SWR for data fetching
 - Implement request cancellation for unmounted components
+- Use consistency tokens to avoid stale results after updates
+- Batch multiple checks when possible
 
 ## HCC-Specific Context
 
@@ -245,16 +343,49 @@ The Provider should:
 5. **Security**: Never commit secrets, always validate on backend
 6. **NX Tooling**: This project uses NX for build orchestration, caching, and task execution
 
-## Access Check Naming Examples
+## Resource Types and Relations Examples
 
-- `inventory_group_view`
-- `inventory_group_update`
-- `inventory_group_delete`
-- `workspaces_view`
-- `workspaces_create`
-- `workspaces_update`
-- `workspaces_delete`
-- `workspaces_rename`
+**Resource Types**:
+- `workspace`
+- `group`
+- `inventory_group`
+
+**Relations**:
+- `view`
+- `edit`
+- `delete`
+- `create`
+- `move`
+- `rename`
+- `role_bindings_view`
+- `role_bindings_grant`
+- `role_bindings_revoke`
+
+**Usage Example**:
+```javascript
+// Single check
+useSelfAccessCheck({
+  relation: 'delete',
+  resource: { id: 'uuid-123', type: 'workspace' }
+});
+
+// Bulk check - same relation
+useSelfAccessCheck({
+  relation: 'view',
+  resources: [
+    { id: 'uuid-1', type: 'workspace' },
+    { id: 'uuid-2', type: 'group' }
+  ]
+});
+
+// Bulk check - nested relations
+useSelfAccessCheck({
+  resources: [
+    { id: 'uuid-1', type: 'workspace', relation: 'delete' },
+    { id: 'uuid-2', type: 'workspace', relation: 'edit' }
+  ]
+});
+```
 
 ## Common Tasks
 

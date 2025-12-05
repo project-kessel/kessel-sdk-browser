@@ -1,6 +1,19 @@
 export { AccessCheck } from './AccessCheckProvider';
-export { useAccessCheck, useBulkAccessCheck } from './hooks';
+export { useSelfAccessCheck } from './hooks';
 
 // Type exports
-export type AccessCheckResponse = boolean | undefined;
-export type BulkAccessCheckResponse = string[] | undefined;
+export type {
+  NotEmptyArray,
+  SelfAccessCheckResource,
+  SelfAccessCheckResourceWithRelation,
+  SelfAccessCheckError,
+  SelfAccessCheckParams,
+  BulkSelfAccessCheckCommonParams,
+  BulkSelfAccessCheckParams,
+  BulkSelfAccessCheckNestedRelationsParams,
+  SelfAccessCheckResultItem,
+  SelfAccessCheckResultItemWithRelation,
+  SelfAccessCheckResultCommon,
+  SelfAccessCheckResult,
+  BulkSelfAccessCheckResult,
+} from './types';

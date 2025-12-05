@@ -37,6 +37,7 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-redeclare': ['error'], // Use TypeScript version for overloads
 
       // React specific
       'react/react-in-jsx-scope': 'off', // Not needed in React 17+
@@ -45,6 +46,7 @@ export default [
       // General
       'no-console': 'off', // Allow console.log in this barebones package
       'no-undef': 'off', // TypeScript handles this
+      'no-redeclare': 'off', // Disable base rule, use TypeScript version instead
     },
     settings: {
       react: {
@@ -58,6 +60,7 @@ export default [
       'dist/**',
       'node_modules/**',
       'coverage/**',
+      '.nx/**',
       '*.config.js',
       'jest.config.js',
       'jest.preset.js',

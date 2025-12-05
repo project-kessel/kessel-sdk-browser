@@ -1,20 +1,51 @@
 import { useEffect } from 'react';
+import type {
+  SelfAccessCheckParams,
+  BulkSelfAccessCheckParams,
+  BulkSelfAccessCheckNestedRelationsParams,
+  SelfAccessCheckResult,
+  BulkSelfAccessCheckResult,
+} from './types';
 
-export const useAccessCheck = (checkName: string): boolean | undefined => {
+// Function overload signatures
+export function useSelfAccessCheck(
+  params: SelfAccessCheckParams
+): SelfAccessCheckResult;
+export function useSelfAccessCheck(
+  params: BulkSelfAccessCheckParams
+): BulkSelfAccessCheckResult;
+export function useSelfAccessCheck(
+  params: BulkSelfAccessCheckNestedRelationsParams
+): BulkSelfAccessCheckResult;
+
+// Implementation
+export function useSelfAccessCheck(
+  params:
+    | SelfAccessCheckParams
+    | BulkSelfAccessCheckParams
+    | BulkSelfAccessCheckNestedRelationsParams
+):
+  | SelfAccessCheckResult
+  | BulkSelfAccessCheckResult {
   useEffect(() => {
-    console.log('useAccessCheck called with:', checkName);
-  }, [checkName]);
+    console.log('useSelfAccessCheck called with:', params);
+  }, [params]);
 
-  return undefined;
-};
-
-export const useBulkAccessCheck = (
-  checkName: string,
-  resourceIDs: string[]
-): string[] | undefined => {
-  useEffect(() => {
-    console.log('useBulkAccessCheck called with:', checkName, resourceIDs);
-  }, [checkName, resourceIDs]);
-
-  return undefined;
-};
+  // Determine if this is a single or bulk check based on params
+  if ('resource' in params) {
+    // Single resource check
+    return {
+      data: undefined,
+      loading: false,
+      error: undefined,
+    };
+  } else {
+    // Bulk resource check
+    return {
+      data: undefined,
+      loading: false,
+      error: undefined,
+      consistencyToken: undefined,
+    };
+  }
+}
