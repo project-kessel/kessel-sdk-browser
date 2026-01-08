@@ -55,6 +55,24 @@ jobs:
           fi
           echo "Build artifacts verified successfully"
 
+  validate-commits:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: .commitlintrc.json
+          failOnWarnings: false
+          helpURL: https://www.conventionalcommits.org/
+
   test-coverage:
     name: Test Coverage
     runs-on: ubuntu-latest

@@ -1,5 +1,5 @@
 {
-  "name": "@redhat-cloud-services/frontend-kessel-access-checks",
+  "name": "@project-kessel/frontend-kessel-access-checks",
   "$schema": "./node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "src",
   "projectType": "library",

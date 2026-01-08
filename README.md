@@ -1,4 +1,4 @@
-# @redhat-cloud-services/frontend-kessel-access-checks
+# @project-kessel/frontend-kessel-access-checks
 
 A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities in your application.
 
@@ -42,26 +42,26 @@ A React SDK for performing granular and bulk access checks against the Kessel ac
 ## Installation
 
 ```bash
-npm install @redhat-cloud-services/frontend-kessel-access-checks
+npm install @project-kessel/frontend-kessel-access-checks
 ```
 
 or
 
 ```bash
-yarn add @redhat-cloud-services/frontend-kessel-access-checks
+yarn add @project-kessel/frontend-kessel-access-checks
 ```
 
 or
 
 ```bash
-pnpm add @redhat-cloud-services/frontend-kessel-access-checks
+pnpm add @project-kessel/frontend-kessel-access-checks
 ```
 
 ## Quick Start
 
 ```jsx
 import React from 'react';
-import { AccessCheck, useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { AccessCheck, useSelfAccessCheck } from '@project-kessel/frontend-kessel-access-checks';
 
 // 1. Wrap your application with the provider
 function App() {
@@ -261,7 +261,7 @@ const errors = checks?.filter(check => check.error);
 Check if a user can delete a specific workspace:
 
 ```jsx
-import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@project-kessel/frontend-kessel-access-checks';
 
 function WorkspaceActions({ workspaceId }) {
   const { data: deleteCheck, loading } = useSelfAccessCheck({
@@ -286,7 +286,7 @@ function WorkspaceActions({ workspaceId }) {
 Check which workspaces a user can delete:
 
 ```jsx
-import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@project-kessel/frontend-kessel-access-checks';
 
 function WorkspaceList({ workspaces }) {
   const { data: deleteChecks, loading } = useSelfAccessCheck({
@@ -320,7 +320,7 @@ function WorkspaceList({ workspaces }) {
 Check multiple different permissions in a single request:
 
 ```jsx
-import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@project-kessel/frontend-kessel-access-checks';
 
 function WorkspacePermissions({ workspaceId }) {
   const { data: checks, loading } = useSelfAccessCheck({
@@ -352,7 +352,7 @@ function WorkspacePermissions({ workspaceId }) {
 Show different UI based on permissions:
 
 ```jsx
-import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@project-kessel/frontend-kessel-access-checks';
 
 function ResourceActions({ resourceId, resourceType }) {
   const { data: checks, loading } = useSelfAccessCheck({
@@ -389,7 +389,7 @@ function ResourceActions({ resourceId, resourceType }) {
 Filter a list to show only items the user can access:
 
 ```jsx
-import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@project-kessel/frontend-kessel-access-checks';
 
 function FilteredWorkspaceList({ allWorkspaces }) {
   const { data: viewChecks, loading } = useSelfAccessCheck({
@@ -419,7 +419,7 @@ function FilteredWorkspaceList({ allWorkspaces }) {
 Ensure read-your-writes consistency after making changes:
 
 ```jsx
-import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@project-kessel/frontend-kessel-access-checks';
 
 function WorkspaceManager({ workspaces }) {
   const [consistencyToken, setConsistencyToken] = useState();
@@ -501,7 +501,7 @@ import {
   SelfAccessCheckResult,
   BulkSelfAccessCheckResult,
   SelfAccessCheckError
-} from '@redhat-cloud-services/frontend-kessel-access-checks';
+} from '@project-kessel/frontend-kessel-access-checks';
 
 // Resource type
 const resource: SelfAccessCheckResource = {
@@ -688,7 +688,7 @@ In Hybrid Cloud Console (HCC), the `AccessCheck.Provider` is already configured 
 Simply import and use the hooks:
 
 ```jsx
-import { useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { useSelfAccessCheck } from '@project-kessel/frontend-kessel-access-checks';
 
 function MyHCCApp({ workspaceId }) {
   const { data, loading } = useSelfAccessCheck({

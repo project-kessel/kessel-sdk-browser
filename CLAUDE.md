@@ -4,7 +4,7 @@ This file provides context and guidelines for AI assistants working on this proj
 
 ## Project Overview
 
-**Package Name**: `@redhat-cloud-services/frontend-kessel-access-checks`
+**Package Name**: `@project-kessel/frontend-kessel-access-checks`
 
 **Purpose**: A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities.
 
