@@ -104,7 +104,7 @@ describe('useSelfAccessCheck', () => {
         resources: [
           { id: 'id-1', type: 'workspace' },
           { id: 'id-2', type: 'workspace' },
-        ],
+        ] as [{ id: string; type: string }, ...{ id: string; type: string }[]],
       };
 
       renderHook(() => useSelfAccessCheck(params));
@@ -190,7 +190,7 @@ describe('useSelfAccessCheck', () => {
         resources: [
           { id: 'id-1', type: 'workspace', relation: 'delete' },
           { id: 'id-2', type: 'workspace', relation: 'view' },
-        ],
+        ] as [{ id: string; type: string; relation: string }, ...{ id: string; type: string; relation: string }[]],
       };
 
       renderHook(() => useSelfAccessCheck(params));

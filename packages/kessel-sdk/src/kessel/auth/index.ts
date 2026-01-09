@@ -86,9 +86,9 @@ export class OAuth2ClientCredentials {
   private tokenCache?: RefreshTokenResponse;
   private authServer: oauth.AuthorizationServer;
   private initialized: boolean = false;
-  private ClientSecretPost: typeof oauth.ClientSecretPost;
-  private clientCredentialsGrantRequest: typeof oauth.clientCredentialsGrantRequest;
-  private processClientCredentialsResponse: typeof oauth.processClientCredentialsResponse;
+  private ClientSecretPost?: typeof oauth.ClientSecretPost;
+  private clientCredentialsGrantRequest?: typeof oauth.clientCredentialsGrantRequest;
+  private processClientCredentialsResponse?: typeof oauth.processClientCredentialsResponse;
 
   /**
    * Creates a new OAuth2ClientCredentials instance.
@@ -153,7 +153,7 @@ export class OAuth2ClientCredentials {
     await this.ensureIsInitialized();
 
     if (!forceRefresh && this.isCacheValid()) {
-      return this.tokenCache;
+      return this.tokenCache!;
     }
 
     this.tokenCache = await this.refresh();
@@ -162,16 +162,16 @@ export class OAuth2ClientCredentials {
 
   private async refresh(): Promise<Readonly<RefreshTokenResponse>> {
     const client: oauth.Client = { client_id: this.auth.clientId };
-    const clientAuth = this.ClientSecretPost(this.auth.clientSecret);
+    const clientAuth = this.ClientSecretPost!(this.auth.clientSecret);
     const parameters = new URLSearchParams();
 
-    const response = await this.clientCredentialsGrantRequest(
+    const response = await this.clientCredentialsGrantRequest!(
       this.authServer,
       client,
       clientAuth,
       parameters,
     );
-    const result = await this.processClientCredentialsResponse(
+    const result = await this.processClientCredentialsResponse!(
       this.authServer,
       client,
       response,
