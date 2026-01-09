@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "module": "es2022",
+    "declaration": false,
+    "outDir": "dist/esm",
+    "esModuleInterop": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "skipLibCheck": true
+  },
+  "tsc-alias": {
+    "verbose": false,
+    "resolveFullPaths": true,
+    "replacers": {
+      "replacer": {
+        "enabled": true,
+        "file": "./tsc-alias-replacers/replacer.js"
+      }
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "../../node_modules", "src/**/__tests__/**", "dist"]
+}

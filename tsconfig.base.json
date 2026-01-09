@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "composite": true,
+    "composite": false,
     "declarationMap": true,
     "importHelpers": true,
-    "isolatedModules": true,
+    "isolatedModules": false,
     "lib": ["ES2015", "DOM"],
     "module": "commonjs",
     "moduleResolution": "node",
@@ -19,6 +19,15 @@
     "jsx": "react",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@redhat-cloud-services/frontend-kessel-access-checks": [
+        "packages/kessel-access-checks/src/index.ts"
+      ],
+      "@project-kessel/kessel-sdk": [
+        "packages/kessel-sdk/src/index.ts"
+      ]
+    }
   }
 }

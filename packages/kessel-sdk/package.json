@@ -1,0 +1,110 @@
+{
+  "name": "@project-kessel/kessel-sdk",
+  "version": "3.3.1",
+  "description": "This is the official Node.js SDK for Project Kessel, a system for unifying APIs and experiences with fine-grained authorization, common inventory, and CloudEvents.",
+  "type": "module",
+  "exports": {
+    "./kessel/inventory/v1": {
+      "require": "./dist/cjs/kessel/inventory/v1/index.js",
+      "import": "./dist/esm/kessel/inventory/v1/index.js",
+      "types": "./dist/types/kessel/inventory/v1/index.d.ts"
+    },
+    "./kessel/inventory/v1/*": {
+      "require": "./dist/cjs/kessel/inventory/v1/*.js",
+      "import": "./dist/esm/kessel/inventory/v1/*.js",
+      "types": "./dist/types/kessel/inventory/v1/*.d.ts"
+    },
+    "./kessel/inventory/v1beta2": {
+      "require": "./dist/cjs/kessel/inventory/v1beta2/index.js",
+      "import": "./dist/esm/kessel/inventory/v1beta2/index.js",
+      "types": "./dist/types/kessel/inventory/v1beta2/index.d.ts"
+    },
+    "./kessel/inventory/v1beta2/*": {
+      "require": "./dist/cjs/kessel/inventory/v1beta2/*.js",
+      "import": "./dist/esm/kessel/inventory/v1beta2/*.js",
+      "types": "./dist/types/kessel/inventory/v1beta2/*.d.ts"
+    },
+    "./kessel/auth": {
+      "require": "./dist/cjs/kessel/auth/index.js",
+      "import": "./dist/esm/kessel/auth/index.js",
+      "types": "./dist/types/kessel/auth/index.d.ts"
+    },
+    "./kessel/auth/*": {
+      "require": "./dist/cjs/kessel/auth/*.js",
+      "import": "./dist/esm/kessel/auth/*.js",
+      "types": "./dist/types/kessel/auth/*.d.ts"
+    },
+    "./kessel/rbac/v2": {
+      "require": "./dist/cjs/kessel/rbac/v2.js",
+      "import": "./dist/esm/kessel/rbac/v2.js",
+      "types": "./dist/types/kessel/rbac/v2.d.ts"
+    },
+    "./kessel/grpc": {
+      "require": "./dist/cjs/kessel/grpc/index.js",
+      "import": "./dist/esm/kessel/grpc/index.js",
+      "types": "./dist/types/kessel/grpc/index.d.ts"
+    },
+    "./promisify": {
+      "require": "./dist/cjs/promisify.js",
+      "import": "./dist/esm/promisify.js",
+      "types": "./dist/types/promisify.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/types/*",
+        "dist/types/*/index.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "nx build",
+    "build:cjs": "tsc --module commonjs --outDir dist/cjs/ && echo '{\"type\":\"commonjs\"}' > dist/cjs/package.json",
+    "build:esm": "tsc --module es2022 --outDir dist/esm/ && tsc-alias && echo '{\"type\":\"module\"}' > dist/esm/package.json",
+    "build:types": "tsc --declaration true --emitDeclarationOnly true --declarationDir dist/types",
+    "test": "nx test",
+    "lint": "nx lint"
+  },
+  "files": [
+    "package.json",
+    "dist/**",
+    "src/**",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/project-kessel/kessel-sdk-node.git"
+  },
+  "keywords": [
+    "kessel",
+    "access-control",
+    "authorization",
+    "permissions",
+    "rebac",
+    "relationship-based-access-control",
+    "zanzibar",
+    "grpc",
+    "typescript",
+    "nodejs"
+  ],
+  "author": "Josejulio Martínez",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/project-kessel/kessel-sdk-node/issues"
+  },
+  "homepage": "https://project-kessel.github.io",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.13.4"
+  },
+  "optionalDependencies": {
+    "oauth4webapi": "^3.5.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

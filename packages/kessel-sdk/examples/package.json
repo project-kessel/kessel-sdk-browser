@@ -1,0 +1,37 @@
+{
+  "name": "kessel-sdk-examples",
+  "version": "1.0.0",
+  "scripts": {
+    "vanilla:check": "tsx vanilla/check.ts",
+    "vanilla:check_bulk": "tsx vanilla/check_bulk.ts",
+    "vanilla:check_for_update": "tsx vanilla/check_for_update.ts",
+    "vanilla:delete_resource": "tsx vanilla/delete_resource.ts",
+    "vanilla:report_resource": "tsx vanilla/report_resource.ts",
+    "vanilla:streamed_list_objects": "tsx vanilla/streamed_list_objects.ts",
+    "vanilla:promisify": "tsx vanilla/promisify.ts",
+    "vanilla:auth": "tsx vanilla/auth.ts",
+    "builder:check": "tsx builder/check.ts",
+    "builder:check_bulk": "tsx builder/check_bulk.ts",
+    "builder:check_for_update": "tsx builder/check_for_update.ts",
+    "builder:delete_resource": "tsx builder/delete_resource.ts",
+    "builder:report_resource": "tsx builder/report_resource.ts",
+    "builder:streamed_list_objects": "tsx builder/streamed_list_objects.ts",
+    "builder:auth": "tsx builder/auth.ts",
+    "rbac:fetch_workspace": "tsx rbac/fetch_workspace.ts",
+    "rbac:list_workspaces": "tsx rbac/list_workspaces.ts",
+    "postinstall": "tsx setup.ts"
+  },
+  "author": "Josejulio Martínez",
+  "license": "Apache-2.0",
+  "description": "",
+  "dependencies": {
+    "@project-kessel/kessel-sdk": "file://..",
+    "dotenv": "^17.1.0",
+    "tsx": "^4.20.2"
+  },
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "typescript": "^5.8.3"
+  }
+}

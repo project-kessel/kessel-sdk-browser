@@ -1,24 +1,24 @@
 {
   "name": "@redhat-cloud-services/frontend-kessel-access-checks",
-  "$schema": "./node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "src",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/kessel-access-checks/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist",
-        "main": "src/index.ts",
-        "tsConfig": "tsconfig.json",
+        "outputPath": "dist/packages/kessel-access-checks",
+        "main": "packages/kessel-access-checks/src/index.ts",
+        "tsConfig": "packages/kessel-access-checks/tsconfig.lib.json",
         "assets": []
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage"],
+      "outputs": ["{workspaceRoot}/coverage/packages/kessel-access-checks"],
       "options": {
-        "jestConfig": "jest.config.js",
+        "jestConfig": "packages/kessel-access-checks/jest.config.js",
         "passWithNoTests": true
       },
       "configurations": {
@@ -31,7 +31,8 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "eslint . --ext .ts,.tsx"
+        "command": "eslint packages/kessel-access-checks --ext .ts,.tsx",
+        "cwd": "{workspaceRoot}"
       }
     }
   }
