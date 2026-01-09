@@ -761,6 +761,7 @@ describe("listWorkspaces", () => {
       });
 
       await expect(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for await (const _response of listWorkspaces(
           client,
           testSubject,

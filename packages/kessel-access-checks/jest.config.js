@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const { default: nxPreset } = require('@nx/jest/preset');
 
 module.exports = {
