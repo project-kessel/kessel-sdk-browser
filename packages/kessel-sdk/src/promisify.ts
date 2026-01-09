@@ -1,6 +1,5 @@
 import { promisify } from "util";
-import { Client, ClientUnaryCall, ServiceError } from "@grpc/grpc-js";
-import { ServiceDefinition } from "@grpc/grpc-js/src/make-client";
+import { Client, ClientUnaryCall, ServiceError, ServiceDefinition } from "@grpc/grpc-js";
 
 interface CallbackClientMethod<
   TRequest = unknown,

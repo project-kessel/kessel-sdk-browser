@@ -8,7 +8,8 @@
     "esModuleInterop": true,
     "strict": true,
     "strictNullChecks": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true
   },
   "tsc-alias": {
     "verbose": false,
@@ -21,5 +22,5 @@
     }
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "../../node_modules", "src/**/__tests__/**", "dist"]
+  "exclude": ["node_modules", "../../node_modules", "src/**/__tests__/**", "dist", "**/node_modules/**"]
 }
