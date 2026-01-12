@@ -1,10 +1,10 @@
 # Kessel SDKs Monorepo
 
-A monorepo containing Kessel SDK packages for browser and Node.js environments, providing unified access to Project Kessel's authorization, inventory, and CloudEvents APIs.
+A monorepo containing Kessel SDK packages for browser environments, providing unified access to Project Kessel's authorization and inventory APIs.
 
 ## Packages
 
-This monorepo contains two packages:
+This monorepo contains one package:
 
 ### [@redhat-cloud-services/frontend-kessel-access-checks](./packages/kessel-access-checks)
 
@@ -12,15 +12,7 @@ A React SDK for performing granular and bulk access checks against the Kessel ac
 
 **Use for**: Frontend applications needing permission checks for UI rendering and user interactions.
 
-### [@project-kessel/kessel-sdk](./packages/kessel-sdk)
-
-The official Node.js SDK for Project Kessel, supporting server-side authorization, inventory management, and CloudEvents.
-
-**Use for**: Backend services, CLI tools, and server-side applications requiring full Kessel API access.
-
 ## Quick Start
-
-### Browser/React Applications
 
 Install the React SDK for frontend access checks:
 
@@ -62,49 +54,15 @@ function WorkspaceView({ workspaceId }) {
 
 See [packages/kessel-access-checks](./packages/kessel-access-checks) for complete documentation.
 
-### Node.js Applications
-
-Install the Node.js SDK for backend services:
-
-```bash
-npm install @project-kessel/kessel-sdk
-```
-
-Basic usage:
-
-```typescript
-import { createInventoryClient } from '@project-kessel/kessel-sdk/kessel/inventory/v1beta2';
-import { createAuthClient } from '@project-kessel/kessel-sdk/kessel/auth';
-
-// Inventory operations
-const inventoryClient = createInventoryClient({
-  url: 'https://kessel.example.com:9000'
-});
-
-// Authorization checks
-const authClient = createAuthClient({
-  url: 'https://kessel.example.com:8000',
-  auth: { token: 'your-jwt-token' }
-});
-```
-
-See [packages/kessel-sdk](./packages/kessel-sdk) for complete documentation.
-
 ## Package Documentation
 
-Each package has its own comprehensive documentation:
+For comprehensive documentation, see:
 
 - **[Frontend Kessel Access Checks](./packages/kessel-access-checks)** - React SDK for browser-based access checks
   - Single and bulk permission checks
   - React Context integration
   - TypeScript support with function overloads
   - HCC (Hybrid Cloud Console) integration
-
-- **[Kessel SDK (Node.js)](./packages/kessel-sdk)** - Full Node.js SDK for Kessel APIs
-  - Inventory API (v1, v1beta2)
-  - Authorization API (RBAC v2)
-  - gRPC client support
-  - CommonJS and ES Modules support
 
 ## Development
 
@@ -132,7 +90,6 @@ Build a specific package:
 
 ```bash
 npx nx run @redhat-cloud-services/frontend-kessel-access-checks:build
-npx nx run @project-kessel/kessel-sdk:build
 ```
 
 ### Testing
@@ -147,7 +104,6 @@ Run tests for a specific package:
 
 ```bash
 npx nx run @redhat-cloud-services/frontend-kessel-access-checks:test
-npx nx run @project-kessel/kessel-sdk:test
 ```
 
 Run tests in watch mode:
@@ -189,29 +145,16 @@ npm run typecheck
 ```
 kessel-sdk-browser/
 ├── packages/
-│   ├── kessel-access-checks/          # React SDK for browser
-│   │   ├── src/
-│   │   │   ├── AccessCheckProvider.tsx
-│   │   │   ├── hooks.ts
-│   │   │   ├── types.ts
-│   │   │   └── index.ts
-│   │   ├── package.json
-│   │   ├── project.json               # NX project configuration
-│   │   ├── tsconfig.lib.json
-│   │   └── jest.config.js
-│   │
-│   └── kessel-sdk/                    # Node.js SDK
+│   └── kessel-access-checks/          # React SDK for browser
 │       ├── src/
-│       │   ├── kessel/
-│       │   │   ├── inventory/
-│       │   │   ├── auth/
-│       │   │   ├── rbac/
-│       │   │   └── grpc/
-│       │   └── promisify.ts
+│       │   ├── AccessCheckProvider.tsx
+│       │   ├── hooks.ts
+│       │   ├── types.ts
+│       │   └── index.ts
 │       ├── package.json
 │       ├── project.json               # NX project configuration
-│       ├── tsconfig.json
-│       └── jest.config.cjs
+│       ├── tsconfig.lib.json
+│       └── jest.config.js
 │
 ├── node_modules/                      # Shared dependencies
 ├── dist/                              # Build outputs
@@ -252,21 +195,17 @@ This repository uses conventional commits for automated versioning. Commit messa
 **Examples**:
 ```bash
 feat(kessel-access-checks): add caching for access check results
-fix(kessel-sdk): resolve TypeScript type errors in auth module
+fix(kessel-access-checks): resolve TypeScript type errors
 docs(readme): update installation instructions
 ```
 
 ## Publishing Packages
 
-Each package can be published independently:
+The package can be published:
 
 ```bash
 # Publish kessel-access-checks
 cd packages/kessel-access-checks
-npm publish
-
-# Publish kessel-sdk
-cd packages/kessel-sdk
 npm publish
 ```
 
