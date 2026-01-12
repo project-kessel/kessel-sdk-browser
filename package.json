@@ -1,10 +1,10 @@
 {
-  "name": "@redhat-cloud-services/kessel-monorepo",
+  "name": "@project-kessel/kessel-sdk-browser",
   "version": "0.0.1",
   "description": "Monorepo for Kessel SDKs including browser and Node.js packages",
   "private": true,
   "workspaces": [
-    "packages/kessel-access-checks"
+    "packages/react-kessel-access-check"
   ],
   "scripts": {
     "nx": "nx",

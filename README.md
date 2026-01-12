@@ -6,7 +6,7 @@ A monorepo containing Kessel SDK packages for browser environments, providing un
 
 This monorepo contains one package:
 
-### [@redhat-cloud-services/frontend-kessel-access-checks](./packages/kessel-access-checks)
+### [@project-kessel/react-kessel-access-check](./packages/react-kessel-access-check)
 
 A React SDK for performing granular and bulk access checks against the Kessel access check service in browser environments.
 
@@ -17,14 +17,14 @@ A React SDK for performing granular and bulk access checks against the Kessel ac
 Install the React SDK for frontend access checks:
 
 ```bash
-npm install @redhat-cloud-services/frontend-kessel-access-checks
+npm install @project-kessel/react-kessel-access-check
 ```
 
 Basic usage:
 
 ```jsx
 import React from 'react';
-import { AccessCheck, useSelfAccessCheck } from '@redhat-cloud-services/frontend-kessel-access-checks';
+import { AccessCheck, useSelfAccessCheck } from '@project-kessel/react-kessel-access-check';
 
 // 1. Wrap your application with the provider
 function App() {
@@ -52,13 +52,13 @@ function WorkspaceView({ workspaceId }) {
 }
 ```
 
-See [packages/kessel-access-checks](./packages/kessel-access-checks) for complete documentation.
+See [packages/react-kessel-access-check](./packages/react-kessel-access-check) for complete documentation.
 
 ## Package Documentation
 
 For comprehensive documentation, see:
 
-- **[Frontend Kessel Access Checks](./packages/kessel-access-checks)** - React SDK for browser-based access checks
+- **[Frontend Kessel Access Checks](./packages/react-kessel-access-check)** - React SDK for browser-based access checks
   - Single and bulk permission checks
   - React Context integration
   - TypeScript support with function overloads
@@ -89,7 +89,7 @@ npm run build
 Build a specific package:
 
 ```bash
-npx nx run @redhat-cloud-services/frontend-kessel-access-checks:build
+npx nx run @project-kessel/react-kessel-access-check:build
 ```
 
 ### Testing
@@ -103,7 +103,7 @@ npm test
 Run tests for a specific package:
 
 ```bash
-npx nx run @redhat-cloud-services/frontend-kessel-access-checks:test
+npx nx run @project-kessel/react-kessel-access-check:test
 ```
 
 Run tests in watch mode:
@@ -145,7 +145,7 @@ npm run typecheck
 ```
 kessel-sdk-browser/
 ├── packages/
-│   └── kessel-access-checks/          # React SDK for browser
+│   └── react-kessel-access-check/          # React SDK for browser
 │       ├── src/
 │       │   ├── AccessCheckProvider.tsx
 │       │   ├── hooks.ts
@@ -159,7 +159,7 @@ kessel-sdk-browser/
 ├── node_modules/                      # Shared dependencies
 ├── dist/                              # Build outputs
 │   └── packages/
-│       └── kessel-access-checks/
+│       └── react-kessel-access-check/
 │
 ├── package.json                       # Root workspace configuration
 ├── nx.json                            # NX workspace configuration
@@ -172,7 +172,7 @@ kessel-sdk-browser/
 ### Key Features
 
 - **Shared Dependencies**: All packages share dependencies from the root `node_modules`, reducing duplication
-- **TypeScript Path Aliases**: Import packages using their npm names (e.g., `@redhat-cloud-services/frontend-kessel-access-checks`)
+- **TypeScript Path Aliases**: Import packages using their npm names (e.g., `@project-kessel/react-kessel-access-check`)
 - **NX Caching**: Build and test results are cached for faster subsequent runs
 - **Independent Versioning**: Each package maintains its own version and can be published independently
 - **Workspace Support**: Uses npm workspaces for package management
@@ -194,8 +194,8 @@ This repository uses conventional commits for automated versioning. Commit messa
 
 **Examples**:
 ```bash
-feat(kessel-access-checks): add caching for access check results
-fix(kessel-access-checks): resolve TypeScript type errors
+feat(react-kessel-access-check): add caching for access check results
+fix(react-kessel-access-check): resolve TypeScript type errors
 docs(readme): update installation instructions
 ```
 
@@ -204,8 +204,8 @@ docs(readme): update installation instructions
 The package can be published:
 
 ```bash
-# Publish kessel-access-checks
-cd packages/kessel-access-checks
+# Publish react-kessel-access-check
+cd packages/react-kessel-access-check
 npm publish
 ```
 

@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
-    "outDir": "../../dist/packages/kessel-access-checks",
+    "outDir": "../../dist/packages/react-kessel-access-check",
     "rootDir": "./src"
   },
   "include": ["src/**/*"],
