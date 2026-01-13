@@ -4,9 +4,6 @@
   "description": "A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities in your application.",
   "main": "index.js",
   "types": "index.d.ts",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "build": "nx build",
     "test": "nx test",
