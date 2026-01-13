@@ -8,6 +8,7 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "rootDir": "packages/react-kessel-access-check/src",
         "outputPath": "dist/packages/react-kessel-access-check",
         "main": "packages/react-kessel-access-check/src/index.ts",
         "tsConfig": "packages/react-kessel-access-check/tsconfig.lib.json",

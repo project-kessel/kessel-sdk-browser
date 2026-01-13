@@ -66,12 +66,12 @@ jobs:
             echo "Build failed: dist/packages/react-kessel-access-check directory not found"
             exit 1
           fi
-          if [ ! -f "dist/packages/react-kessel-access-check/src/index.js" ]; then
-            echo "Build failed: dist/packages/react-kessel-access-check/src/index.js not found"
+          if [ ! -f "dist/packages/react-kessel-access-check/index.js" ]; then
+            echo "Build failed: dist/packages/react-kessel-access-check/index.js not found"
             exit 1
           fi
-          if [ ! -f "dist/packages/react-kessel-access-check/src/index.d.ts" ]; then
-            echo "Build failed: dist/packages/react-kessel-access-check/src/index.d.ts not found"
+          if [ ! -f "dist/packages/react-kessel-access-check/index.d.ts" ]; then
+            echo "Build failed: dist/packages/react-kessel-access-check/index.d.ts not found"
             exit 1
           fi
           echo "Build artifacts verified successfully"
