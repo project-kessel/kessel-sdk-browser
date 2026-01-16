@@ -1,6 +1,6 @@
 {
   "name": "@project-kessel/react-kessel-access-check",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities in your application.",
   "main": "index.js",
   "types": "index.d.ts",
