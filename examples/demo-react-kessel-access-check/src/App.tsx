@@ -17,7 +17,7 @@ function App() {
 
   return (
     <AccessCheck.Provider
-      baseUrl=""  // Empty since MSW intercepts locally
+      baseUrl="http://localhost:3000"  // MSW intercepts all requests locally
       apiPath="/api/inventory/v1beta2"
     >
       <Layout>

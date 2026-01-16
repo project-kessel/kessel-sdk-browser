@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useAccessCheckContext } from './AccessCheckContext';
+import { checkSelf } from './core/api-client';
+import { transformSingleResponse, transformError } from './core/transformers';
 import type {
   SelfAccessCheckParams,
   BulkSelfAccessCheckParams,
   BulkSelfAccessCheckNestedRelationsParams,
   SelfAccessCheckResult,
   BulkSelfAccessCheckResult,
-  SelfAccessCheckResultItemWithRelation,
 } from './types';
 
 // Function overload signatures
@@ -25,64 +27,95 @@ export function useSelfAccessCheck(
     | SelfAccessCheckParams
     | BulkSelfAccessCheckParams
     | BulkSelfAccessCheckNestedRelationsParams
-):
-  | SelfAccessCheckResult
-  | BulkSelfAccessCheckResult {
-  useEffect(() => {
-    console.log('useSelfAccessCheck called with:', params);
-  }, [params]);
+): SelfAccessCheckResult | BulkSelfAccessCheckResult {
+  const config = useAccessCheckContext();
 
   // Determine if this is a single or bulk check based on params
-  if ('resource' in params) {
-    // Single resource check - return hardcoded dummy data
+  const isSingleCheck = 'resource' in params;
+
+  // Always call hooks unconditionally (Rules of Hooks)
+  const [data, setData] = useState<SelfAccessCheckResult['data']>(undefined);
+  const [loading, setLoading] = useState<boolean>(!isSingleCheck ? false : true);
+  const [error, setError] = useState<SelfAccessCheckResult['error']>(
+    !isSingleCheck
+      ? {
+          code: 501,
+          message: 'Bulk access checks not yet implemented',
+          details: [],
+        }
+      : undefined
+  );
+
+  // Extract single check params for dependency tracking
+  const singleCheckResource = isSingleCheck
+    ? (params as SelfAccessCheckParams).resource
+    : null;
+  const singleCheckRelation = isSingleCheck
+    ? (params as SelfAccessCheckParams).relation
+    : null;
+
+  useEffect(() => {
+    // Only perform API call for single resource checks
+    if (!isSingleCheck || !singleCheckResource || !singleCheckRelation) {
+      return;
+    }
+
+    const abortController = new AbortController();
+    let isMounted = true;
+
+    const performCheck = async () => {
+      setLoading(true);
+      setError(undefined);
+      setData(undefined);
+
+      try {
+        const response = await checkSelf(config, {
+          resource: singleCheckResource,
+          relation: singleCheckRelation,
+        });
+
+        if (isMounted) {
+          const transformedData = transformSingleResponse(
+            response,
+            singleCheckResource
+          );
+          setData(transformedData);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (isMounted) {
+          const transformedError = transformError(
+            err as { code: number; message: string; details?: unknown[] }
+          );
+          setError(transformedError);
+          setLoading(false);
+        }
+      }
+    };
+
+    performCheck();
+
+    return () => {
+      isMounted = false;
+      abortController.abort();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, isSingleCheck, singleCheckResource?.id, singleCheckResource?.type, singleCheckRelation]);
+
+  // Return appropriate result type based on check type
+  if (isSingleCheck) {
     const result: SelfAccessCheckResult = {
-      data: {
-        allowed: true,
-        resource: params.resource,
-      },
-      loading: false,
-      error: undefined,
+      data,
+      loading,
+      error,
     };
     return result;
   } else {
-    // Bulk resource check - return hardcoded dummy data with various scenarios
+    // TODO: Implement bulk access check using checkSelfBulk API
     const bulkResult: BulkSelfAccessCheckResult = {
-      data: params.resources.map((resource, index) => {
-        // Determine relation - either from the resource itself or from params
-        const relation: string = 'relation' in resource
-          ? (resource.relation as string)
-          : (params as BulkSelfAccessCheckParams).relation;
-
-        // Create different scenarios for demonstration
-        // First item: allowed
-        // Second item: not allowed
-        // Third item: allowed
-        // Fourth+ items: not allowed with occasional error
-        const isAllowed = index === 0 || index === 2;
-        const hasError = index === 3;
-
-        const item: SelfAccessCheckResultItemWithRelation = {
-          allowed: isAllowed,
-          resource: resource,
-          relation: relation,
-        };
-
-        // Add error to the fourth item as an example
-        if (hasError) {
-          item.error = {
-            code: 404,
-            message: 'Resource not found',
-            details: [],
-          };
-        }
-
-        return item;
-      }),
-      loading: false,
-      error: undefined,
-      consistencyToken: {
-        token: 'dummy-consistency-token-12345',
-      },
+      data: undefined,
+      loading,
+      error,
     };
     return bulkResult;
   }

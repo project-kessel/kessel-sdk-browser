@@ -9,29 +9,33 @@ export const handlers = [
   http.post('/api/inventory/v1beta2/checkself', async ({ request }) => {
     await delay(800); // Simulate network latency
 
-    const body = await request.json() as { relation: string; resource: { id: string; type: string; [key: string]: unknown } };
-    const { relation, resource } = body;
+    const body = await request.json() as {
+      object: { resourceId: string; resourceType: string };
+      relation: string;
+    };
+    const { object, relation } = body;
+    const { resourceId, resourceType } = object;
 
     // Simulate error scenarios for demo purposes
-    if (resource.id === 'error-network') {
+    if (resourceId === 'error-network') {
       return HttpResponse.json(
         { code: 503, message: 'Service unavailable', details: [] },
         { status: 503 }
       );
     }
 
-    if (resource.id === 'error-permission') {
+    if (resourceId === 'error-permission') {
       return HttpResponse.json(
         { code: 403, message: 'Permission denied', details: [] },
         { status: 403 }
       );
     }
 
-    const allowed = permissions[resource.id]?.[relation] || false;
+    const isAllowed = permissions[resourceId]?.[relation] || false;
+    const allowedEnum = isAllowed ? 'ALLOWED_TRUE' : 'ALLOWED_FALSE';
 
     return HttpResponse.json({
-      allowed,
-      resource
+      allowed: allowedEnum,
     });
   }),
 

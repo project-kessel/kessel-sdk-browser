@@ -2,6 +2,13 @@
 
 A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities in your application.
 
+> **⚠️ Current Implementation Status**
+>
+> - ✅ **Single Resource Checks** - Fully implemented and ready to use
+> - 🚧 **Bulk Access Checks** - Coming soon (returns "not implemented" error)
+>
+> Only single resource checks are currently implemented. If you attempt to use bulk checks (checking multiple resources at once), the hook will return an error with code 501 and message "Bulk access checks not yet implemented".
+
 ## Table of Contents
 
 - [Installation](#installation)
@@ -86,11 +93,11 @@ The main provider component that wraps your application and provides access chec
 
 #### Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `baseUrl` | `string` | No | `window.location.origin` | The base URL for the API server |
-| `apiPath` | `string` | No | `'/api/inventory/v1beta2'` | The base path for the access check API endpoints |
-| `children` | `ReactNode` | Yes | - | Child components that will have access to the access check hooks |
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `baseUrl` | `string` | Yes | The base URL for the API server (e.g., `https://console.redhat.com`) |
+| `apiPath` | `string` | Yes | The base path for the access check API endpoints (e.g., `/api/inventory/v1beta2`) |
+| `children` | `ReactNode` | Yes | Child components that will have access to the access check hooks |
 
 #### Example
 
@@ -432,16 +439,7 @@ function WorkspaceManager({ workspaces }) {
 
 ## Configuration
 
-### Default Configuration
-
-If no props are provided to `AccessCheck.Provider`, it uses these defaults:
-
-- `baseUrl`: `window.location.origin`
-- `apiPath`: `'/api/inventory/v1beta2'`
-
-### Custom Configuration
-
-For different environments or custom API endpoints:
+The `AccessCheck.Provider` requires both `baseUrl` and `apiPath` props to be provided. These should be configured based on your environment:
 
 ```jsx
 // Development
@@ -769,6 +767,56 @@ if (errors?.length) {
   console.error('Some checks failed:', errors);
 }
 ```
+
+## Troubleshooting
+
+### Common Errors
+
+#### "useAccessCheckContext must be used within an AccessCheckProvider"
+
+This error occurs when you try to use `useSelfAccessCheck` outside of an `AccessCheck.Provider`. Make sure your component is wrapped in the provider:
+
+```jsx
+// ✗ Wrong
+function App() {
+  const { data } = useSelfAccessCheck({ relation: 'view', resource: { id: '1', type: 'workspace' } });
+  return <div>...</div>;
+}
+
+// ✓ Correct
+function App() {
+  return (
+    <AccessCheck.Provider baseUrl="https://api.example.com" apiPath="/api/inventory/v1beta2">
+      <MyComponent />
+    </AccessCheck.Provider>
+  );
+}
+
+function MyComponent() {
+  const { data } = useSelfAccessCheck({ relation: 'view', resource: { id: '1', type: 'workspace' } });
+  return <div>...</div>;
+}
+```
+
+#### "Bulk access checks not yet implemented" (Error 501)
+
+This is expected behavior. Bulk access checks are not yet implemented. For now, only single resource checks are supported. See the [Current Implementation Status](#current-implementation-status) section above.
+
+#### Network or CORS Errors
+
+Make sure:
+1. Your `baseUrl` and `apiPath` are correctly configured
+2. The backend API is accessible from your frontend
+3. CORS is properly configured on the backend to allow requests from your frontend domain
+4. JWT authentication cookies are being sent (credentials: 'include' is enabled by default)
+
+#### Loading Never Completes
+
+If the `loading` state never changes to `false`, check:
+1. Network tab in browser DevTools to see if the request is being made
+2. Console for any JavaScript errors
+3. That the API endpoint is responding correctly
+4. That there are no network errors or timeouts
 
 This project uses **NX** for build tooling, which provides intelligent caching and faster builds. NX will cache successful builds and tests, making subsequent runs significantly faster.
 
