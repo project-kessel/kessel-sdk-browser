@@ -6,7 +6,7 @@ let consistencyTokenCounter = 1;
 
 export const handlers = [
   // Single resource check endpoint
-  http.post('/api/inventory/v1beta2/checkself', async ({ request }) => {
+  http.post('http://localhost:3000/api/inventory/v1beta2/checkself', async ({ request }) => {
     await delay(800); // Simulate network latency
 
     const body = await request.json() as {
@@ -40,7 +40,7 @@ export const handlers = [
   }),
 
   // Bulk resource check endpoint
-  http.post('/api/inventory/v1beta2/checkselfbulk', async ({ request }) => {
+  http.post('http://localhost:3000/api/inventory/v1beta2/checkselfbulk', async ({ request }) => {
     await delay(1000); // Simulate network latency
 
     const body = await request.json() as {
