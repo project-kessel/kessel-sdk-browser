@@ -39,55 +39,60 @@ export const handlers = [
     });
   }),
 
-  // Bulk resource check endpoint
+  // Bulk resource check endpoint - matches OpenAPI spec
   http.post('http://localhost:3000/api/inventory/v1beta2/checkselfbulk', async ({ request }) => {
     await delay(1000); // Simulate network latency
 
     const body = await request.json() as {
-      relation?: string;
-      resources: Array<{ id: string; type: string; relation?: string; [key: string]: unknown }>;
-      consistency?: unknown;
+      items: Array<{
+        object: { resourceId: string; resourceType: string };
+        relation: string;
+      }>;
+      consistency?: {
+        minimizeLatency?: boolean;
+        atLeastAsFresh?: { token: string };
+      };
     };
-    const { relation, resources } = body;
+    const { items } = body;
 
     // Simulate global error for specific test cases
-    if (resources.some(r => r.id === 'error-bulk')) {
+    if (items.some(item => item.object.resourceId === 'error-bulk')) {
       return HttpResponse.json(
         { code: 500, message: 'Internal server error', details: [] },
         { status: 500 }
       );
     }
 
-    const results = resources.map(resource => {
-      const resourceRelation = resource.relation || relation;
+    const pairs = items.map(item => {
+      const { object, relation } = item;
+      const resourceId = object.resourceId;
 
       // Simulate per-item errors
-      if (resource.id === 'error-item') {
+      if (resourceId === 'error-item') {
         return {
-          allowed: false,
-          resource,
-          relation: resourceRelation,
+          request: item,
+          item: { allowed: 'ALLOWED_FALSE' as const },
           error: {
             code: 404,
-            message: `Resource ${resource.id} not found`,
+            message: `Resource ${resourceId} not found`,
             details: []
           }
         };
       }
 
-      const allowed = resourceRelation ? (permissions[resource.id]?.[resourceRelation] || false) : false;
+      const isAllowed = permissions[resourceId]?.[relation] || false;
+      const allowedEnum = isAllowed ? 'ALLOWED_TRUE' : 'ALLOWED_FALSE';
 
       return {
-        allowed,
-        resource,
-        relation: resourceRelation
+        request: item,
+        item: { allowed: allowedEnum as 'ALLOWED_TRUE' | 'ALLOWED_FALSE' }
       };
     });
 
     const token = `token-${consistencyTokenCounter++}`;
 
     return HttpResponse.json({
-      results,
+      pairs,
       consistencyToken: { token }
     });
   })
