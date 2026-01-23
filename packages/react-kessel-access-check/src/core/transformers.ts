@@ -1,9 +1,10 @@
 import type {
   SelfAccessCheckResource,
   SelfAccessCheckResultItem,
+  SelfAccessCheckResultItemWithRelation,
   SelfAccessCheckError,
 } from '../types';
-import type { CheckSelfResponse, AllowedEnum, ApiErrorResponse } from './api-client';
+import type { CheckSelfResponse, AllowedEnum, ApiErrorResponse, CheckSelfBulkResponse, CheckSelfBulkResponsePair } from './api-client';
 
 /**
  * Maps the API's allowed enum to a boolean value
@@ -45,10 +46,28 @@ export function transformError(error: ApiErrorResponse): SelfAccessCheckError {
 }
 
 /**
- * Placeholder for bulk response transformation
- * Will handle chunking, deduplication, consistency tokens, and per-item errors
- * @throws Error indicating the feature is not yet implemented
+ * Transforms a bulk response to the hook's expected format.
+ * Maps each response pair back to the original resource with relation.
  */
-export function transformBulkResponse(): never {
-  throw new Error('Bulk response transformation not yet implemented');
+export function transformBulkResponse(
+  response: CheckSelfBulkResponse,
+  originalResources: Array<{ resource: SelfAccessCheckResource; relation: string }>
+): SelfAccessCheckResultItemWithRelation[] {
+  return response.pairs.map((pair: CheckSelfBulkResponsePair, index: number) => {
+    // Find the original resource to preserve additional properties
+    const original = originalResources[index];
+    
+    const result: SelfAccessCheckResultItemWithRelation = {
+      allowed: pair.item ? mapAllowedEnum(pair.item.allowed) : false,
+      resource: original.resource,
+      relation: original.relation,
+    };
+
+    // Include per-item error if present
+    if (pair.error) {
+      result.error = transformError(pair.error);
+    }
+
+    return result;
+  });
 }

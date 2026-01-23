@@ -265,11 +265,28 @@ describe('useSelfAccessCheck', () => {
   });
 
   describe('bulk resource check - same relation', () => {
-    it('should return not implemented error', () => {
+    it('should make bulk API call and return results', async () => {
       const resources = [
         { id: 'ws-1', type: 'workspace' },
         { id: 'ws-2', type: 'workspace' },
       ] as [{ id: string; type: string }, ...{ id: string; type: string }[]];
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          pairs: [
+            {
+              request: { object: { resourceId: 'ws-1', resourceType: 'workspace' }, relation: 'delete' },
+              item: { allowed: 'ALLOWED_TRUE' },
+            },
+            {
+              request: { object: { resourceId: 'ws-2', resourceType: 'workspace' }, relation: 'delete' },
+              item: { allowed: 'ALLOWED_FALSE' },
+            },
+          ],
+          consistencyToken: { token: 'test-token-123' },
+        }),
+      } as Response);
 
       const { result } = renderHook(
         () =>
@@ -280,22 +297,95 @@ describe('useSelfAccessCheck', () => {
         { wrapper }
       );
 
-      expect(result.current).toEqual({
-        data: undefined,
-        loading: false,
-        error: {
-          code: 501,
-          message: 'Bulk access checks not yet implemented',
-          details: [],
-        },
-      });
+      // Initially loading
+      expect(result.current.loading).toBe(true);
+
+      // Wait for the API call to complete
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.data).toEqual([
+        { allowed: true, resource: resources[0], relation: 'delete' },
+        { allowed: false, resource: resources[1], relation: 'delete' },
+      ]);
+      expect(result.current.consistencyToken).toEqual({ token: 'test-token-123' });
+      expect(result.current.error).toBeUndefined();
+
+      // Verify fetch was called correctly
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/api/inventory/v1beta2/checkselfbulk',
+        expect.objectContaining({
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            items: [
+              { object: { resourceId: 'ws-1', resourceType: 'workspace' }, relation: 'delete' },
+              { object: { resourceId: 'ws-2', resourceType: 'workspace' }, relation: 'delete' },
+            ],
+          }),
+        })
+      );
     });
 
-    it('should return not implemented error with options', () => {
+    it('should handle bulk API errors', async () => {
+      const resources = [
+        { id: 'ws-1', type: 'workspace' },
+        { id: 'ws-2', type: 'workspace' },
+      ] as [{ id: string; type: string }, ...{ id: string; type: string }[]];
+
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({
+          code: 500,
+          message: 'Internal server error',
+          details: [],
+        }),
+      } as Response);
+
+      const { result } = renderHook(
+        () =>
+          useSelfAccessCheck({
+            relation: 'view',
+            resources,
+          }),
+        { wrapper }
+      );
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.error).toEqual({
+        code: 500,
+        message: 'Internal server error',
+        details: [],
+      });
+      expect(result.current.data).toBeUndefined();
+    });
+
+    it('should pass consistency options to bulk API', async () => {
       const resources = [
         { id: 'id-1', type: 'workspace' },
         { id: 'id-2', type: 'workspace' },
       ] as [{ id: string; type: string }, ...{ id: string; type: string }[]];
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          pairs: [
+            {
+              request: { object: { resourceId: 'id-1', resourceType: 'workspace' }, relation: 'view' },
+              item: { allowed: 'ALLOWED_TRUE' },
+            },
+            {
+              request: { object: { resourceId: 'id-2', resourceType: 'workspace' }, relation: 'view' },
+              item: { allowed: 'ALLOWED_TRUE' },
+            },
+          ],
+          consistencyToken: { token: 'new-token' },
+        }),
+      } as Response);
 
       const { result } = renderHook(
         () =>
@@ -311,16 +401,25 @@ describe('useSelfAccessCheck', () => {
         { wrapper }
       );
 
-      expect(result.current.error).toEqual({
-        code: 501,
-        message: 'Bulk access checks not yet implemented',
-        details: [],
-      });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/api/inventory/v1beta2/checkselfbulk',
+        expect.objectContaining({
+          body: JSON.stringify({
+            items: [
+              { object: { resourceId: 'id-1', resourceType: 'workspace' }, relation: 'view' },
+              { object: { resourceId: 'id-2', resourceType: 'workspace' }, relation: 'view' },
+            ],
+            consistency: { minimizeLatency: true },
+          }),
+        })
+      );
     });
   });
 
   describe('bulk resource check - nested relations', () => {
-    it('should return not implemented error', () => {
+    it('should make bulk API call with per-resource relations', async () => {
       const resources = [
         { id: 'ws-1', type: 'workspace', relation: 'delete' },
         { id: 'ws-2', type: 'workspace', relation: 'view' },
@@ -330,6 +429,27 @@ describe('useSelfAccessCheck', () => {
         ...{ id: string; type: string; relation: string }[]
       ];
 
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          pairs: [
+            {
+              request: { object: { resourceId: 'ws-1', resourceType: 'workspace' }, relation: 'delete' },
+              item: { allowed: 'ALLOWED_TRUE' },
+            },
+            {
+              request: { object: { resourceId: 'ws-2', resourceType: 'workspace' }, relation: 'view' },
+              item: { allowed: 'ALLOWED_TRUE' },
+            },
+            {
+              request: { object: { resourceId: 'ws-3', resourceType: 'workspace' }, relation: 'edit' },
+              item: { allowed: 'ALLOWED_FALSE' },
+            },
+          ],
+          consistencyToken: { token: 'nested-token' },
+        }),
+      } as Response);
+
       const { result } = renderHook(
         () =>
           useSelfAccessCheck({
@@ -338,18 +458,82 @@ describe('useSelfAccessCheck', () => {
         { wrapper }
       );
 
-      expect(result.current).toEqual({
-        data: undefined,
-        loading: false,
-        error: {
-          code: 501,
-          message: 'Bulk access checks not yet implemented',
-          details: [],
-        },
-      });
+      // Initially loading
+      expect(result.current.loading).toBe(true);
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.data).toEqual([
+        { allowed: true, resource: resources[0], relation: 'delete' },
+        { allowed: true, resource: resources[1], relation: 'view' },
+        { allowed: false, resource: resources[2], relation: 'edit' },
+      ]);
+      expect(result.current.consistencyToken).toEqual({ token: 'nested-token' });
+      expect(result.current.error).toBeUndefined();
+
+      // Verify fetch was called correctly
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/api/inventory/v1beta2/checkselfbulk',
+        expect.objectContaining({
+          body: JSON.stringify({
+            items: [
+              { object: { resourceId: 'ws-1', resourceType: 'workspace' }, relation: 'delete' },
+              { object: { resourceId: 'ws-2', resourceType: 'workspace' }, relation: 'view' },
+              { object: { resourceId: 'ws-3', resourceType: 'workspace' }, relation: 'edit' },
+            ],
+          }),
+        })
+      );
     });
 
-    it('should return not implemented error with options', () => {
+    it('should handle per-item errors in bulk response', async () => {
+      const resources = [
+        { id: 'ws-1', type: 'workspace', relation: 'delete' },
+        { id: 'error-item', type: 'workspace', relation: 'view' },
+      ] as [
+        { id: string; type: string; relation: string },
+        ...{ id: string; type: string; relation: string }[]
+      ];
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          pairs: [
+            {
+              request: { object: { resourceId: 'ws-1', resourceType: 'workspace' }, relation: 'delete' },
+              item: { allowed: 'ALLOWED_TRUE' },
+            },
+            {
+              request: { object: { resourceId: 'error-item', resourceType: 'workspace' }, relation: 'view' },
+              item: { allowed: 'ALLOWED_FALSE' },
+              error: { code: 404, message: 'Resource not found', details: [] },
+            },
+          ],
+        }),
+      } as Response);
+
+      const { result } = renderHook(
+        () =>
+          useSelfAccessCheck({
+            resources,
+          }),
+        { wrapper }
+      );
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.data).toEqual([
+        { allowed: true, resource: resources[0], relation: 'delete' },
+        { 
+          allowed: false, 
+          resource: resources[1], 
+          relation: 'view',
+          error: { code: 404, message: 'Resource not found', details: [] }
+        },
+      ]);
+    });
+
+    it('should pass atLeastAsFresh consistency option', async () => {
       const resources = [
         { id: 'id-1', type: 'workspace', relation: 'delete' },
         { id: 'id-2', type: 'workspace', relation: 'view' },
@@ -357,6 +541,23 @@ describe('useSelfAccessCheck', () => {
         { id: string; type: string; relation: string },
         ...{ id: string; type: string; relation: string }[]
       ];
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          pairs: [
+            {
+              request: { object: { resourceId: 'id-1', resourceType: 'workspace' }, relation: 'delete' },
+              item: { allowed: 'ALLOWED_TRUE' },
+            },
+            {
+              request: { object: { resourceId: 'id-2', resourceType: 'workspace' }, relation: 'view' },
+              item: { allowed: 'ALLOWED_FALSE' },
+            },
+          ],
+          consistencyToken: { token: 'fresh-token' },
+        }),
+      } as Response);
 
       const { result } = renderHook(
         () =>
@@ -374,11 +575,23 @@ describe('useSelfAccessCheck', () => {
         { wrapper }
       );
 
-      expect(result.current.error).toEqual({
-        code: 501,
-        message: 'Bulk access checks not yet implemented',
-        details: [],
-      });
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/api/inventory/v1beta2/checkselfbulk',
+        expect.objectContaining({
+          body: JSON.stringify({
+            items: [
+              { object: { resourceId: 'id-1', resourceType: 'workspace' }, relation: 'delete' },
+              { object: { resourceId: 'id-2', resourceType: 'workspace' }, relation: 'view' },
+            ],
+            consistency: { 
+              minimizeLatency: true,
+              atLeastAsFresh: { token: 'consistency-token-123' }
+            },
+          }),
+        })
+      );
     });
   });
 });

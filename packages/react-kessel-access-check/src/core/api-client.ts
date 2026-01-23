@@ -1,4 +1,4 @@
-import type { SelfAccessCheckResource } from '../types';
+import type { SelfAccessCheckResource, SelfAccessCheckResourceWithRelation } from '../types';
 
 // API Configuration
 export type ApiConfig = {
@@ -19,12 +19,51 @@ export type AllowedEnum = 'ALLOWED_TRUE' | 'ALLOWED_FALSE' | 'ALLOWED_UNSPECIFIE
 
 export type CheckSelfResponse = {
   allowed: AllowedEnum;
+  consistencyToken?: {
+    token: string;
+  };
 };
 
 export type ApiErrorResponse = {
   code: number;
   message: string;
   details?: unknown[];
+};
+
+// Bulk API Request/Response Types
+export type CheckSelfBulkRequestItem = {
+  object: {
+    resourceId: string;
+    resourceType: string;
+  };
+  relation: string;
+};
+
+export type CheckSelfBulkRequest = {
+  items: CheckSelfBulkRequestItem[];
+  consistency?: {
+    minimizeLatency?: boolean;
+    atLeastAsFresh?: {
+      token: string;
+    };
+  };
+};
+
+export type CheckSelfBulkResponseItem = {
+  allowed: AllowedEnum;
+};
+
+export type CheckSelfBulkResponsePair = {
+  request: CheckSelfBulkRequestItem;
+  item: CheckSelfBulkResponseItem;
+  error?: ApiErrorResponse;
+};
+
+export type CheckSelfBulkResponse = {
+  pairs: CheckSelfBulkResponsePair[];
+  consistencyToken?: {
+    token: string;
+  };
 };
 
 /**
@@ -77,10 +116,60 @@ export async function checkSelf(
   return data;
 }
 
-/**
- * Placeholder for bulk access check implementation
- * @throws Error indicating the feature is not yet implemented
- */
-export async function checkSelfBulk(): Promise<never> {
-  throw new Error('Bulk access checks not yet implemented');
+export async function checkSelfBulk(
+  config: ApiConfig,
+  params: {
+    items: Array<{
+      resource: SelfAccessCheckResource | SelfAccessCheckResourceWithRelation;
+      relation: string;
+    }>;
+    consistency?: {
+      minimizeLatency?: boolean;
+      atLeastAsFresh?: {
+        token: string;
+      };
+    };
+  }
+): Promise<CheckSelfBulkResponse> {
+  const url = `${config.baseUrl}${config.apiPath}/checkselfbulk`;
+
+  const requestBody: CheckSelfBulkRequest = {
+    items: params.items.map(item => ({
+      object: {
+        resourceId: item.resource.id,
+        resourceType: item.resource.type,
+      },
+      relation: item.relation,
+    })),
+    consistency: params.consistency,
+  };
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // Include JWT cookies
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!response.ok) {
+    // Try to parse error response
+    let errorData: ApiErrorResponse;
+    try {
+      errorData = await response.json();
+    } catch {
+      // If JSON parsing fails, create a generic error
+      errorData = {
+        code: response.status,
+        message: response.statusText || 'Request failed',
+        details: [],
+      };
+    }
+
+    throw errorData;
+  }
+
+  const data: CheckSelfBulkResponse = await response.json();
+  return data;
 }

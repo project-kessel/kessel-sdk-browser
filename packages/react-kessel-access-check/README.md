@@ -798,10 +798,6 @@ function MyComponent() {
 }
 ```
 
-#### "Bulk access checks not yet implemented" (Error 501)
-
-This is expected behavior. Bulk access checks are not yet implemented. For now, only single resource checks are supported. See the [Current Implementation Status](#current-implementation-status) section above.
-
 #### Network or CORS Errors
 
 Make sure:
