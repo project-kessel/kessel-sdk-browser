@@ -2,13 +2,6 @@
 
 A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities in your application.
 
-> **⚠️ Current Implementation Status**
->
-> - ✅ **Single Resource Checks** - Fully implemented and ready to use
-> - 🚧 **Bulk Access Checks** - Coming soon (returns "not implemented" error)
->
-> Only single resource checks are currently implemented. If you attempt to use bulk checks (checking multiple resources at once), the hook will return an error with code 501 and message "Bulk access checks not yet implemented".
-
 ## Table of Contents
 
 - [Installation](#installation)
