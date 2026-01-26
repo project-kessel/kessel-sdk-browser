@@ -14,7 +14,7 @@ export const handlers = [
       relation: string;
     };
     const { object, relation } = body;
-    const { resourceId, resourceType } = object;
+    const { resourceId } = object;
 
     // Simulate error scenarios for demo purposes
     if (resourceId === 'error-network') {

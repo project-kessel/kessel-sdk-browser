@@ -6,7 +6,7 @@ Interactive demo application showcasing all features of the `@project-kessel/rea
 
 ## Overview
 
-This demo provides a comprehensive walkthrough of the React SDK for Kessel access control, demonstrating all three hook patterns, error handling, loading states, and advanced features like consistency tokens.
+This demo provides a simplified walkthrough of the React SDK for Kessel access control, demonstrating the core access check patterns.
 
 ## Features Demonstrated
 
@@ -18,28 +18,6 @@ Check the same permission across multiple resources in a single API call. More e
 
 ### 3. Bulk Nested Relations
 Check different permissions on one or more resources in a single request. Ideal for building permission matrices showing all available actions for a resource.
-
-### 4. Conditional Rendering
-Real-world example of showing/hiding UI elements based on user permissions. Demonstrates best practices for permission-based UI.
-
-### 5. Resource Filtering
-Filter lists to display only resources the user can access. Essential for dashboards and resource lists.
-
-### 6. Error Handling
-Comprehensive error handling including:
-- Network errors (503)
-- Permission denied (403)
-- Per-item errors in bulk operations
-- Global vs. per-item error differentiation
-
-### 7. Loading States
-Three UX patterns for handling async permission checks:
-- Simple spinner
-- Skeleton loaders (reduces layout shift)
-- Progressive rendering (show static content, load permissions)
-
-### 8. Consistency Tokens
-Demonstrates read-your-writes consistency using tokens returned from create/update operations to ensure subsequent checks see the latest state.
 
 ## Quick Start
 
@@ -97,12 +75,7 @@ src/
 │   ├── demos/
 │   │   ├── SingleResourceCheck.tsx
 │   │   ├── BulkSameRelation.tsx
-│   │   ├── BulkNestedRelations.tsx
-│   │   ├── ConditionalRendering.tsx
-│   │   ├── ResourceFiltering.tsx
-│   │   ├── ErrorHandling.tsx
-│   │   ├── LoadingStates.tsx
-│   │   └── ConsistencyTokens.tsx
+│   │   └── BulkNestedRelations.tsx
 │   ├── ui/
 │   │   ├── CodeBlock.tsx
 │   │   ├── DemoSection.tsx
@@ -197,11 +170,6 @@ We recommend exploring the demos in order:
 1. **Single Resource Check** - Understand the basics
 2. **Bulk Same Relation** - Learn efficiency patterns
 3. **Bulk Nested Relations** - Build permission matrices
-4. **Conditional Rendering** - Real-world UI patterns
-5. **Resource Filtering** - List management
-6. **Error Handling** - Production-ready error handling
-7. **Loading States** - UX best practices
-8. **Consistency Tokens** - Advanced distributed systems concepts
 
 ## Integration with Real Backend
 
