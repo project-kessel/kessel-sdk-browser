@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "rootDir": "packages/react-kessel-access-check/src",
-        "outputPath": "dist/packages/react-kessel-access-check",
+        "outputPath": "dist/@project-kessel/react-kessel-access-check",
         "main": "packages/react-kessel-access-check/src/index.ts",
         "tsConfig": "packages/react-kessel-access-check/tsconfig.lib.json",
         "assets": []
