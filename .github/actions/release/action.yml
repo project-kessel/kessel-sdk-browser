@@ -1,0 +1,39 @@
+name: 'Release'
+description: 'Version and publish packages using NX release'
+
+inputs:
+  bot-name:
+    description: 'Bot name for git commits'
+    required: true
+  bot-email:
+    description: 'Bot email for git commits'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure git
+      shell: bash
+      run: |
+        git config user.name "${{ inputs.bot-name }}"
+        git config user.email "${{ inputs.bot-email }}"
+
+    - name: Run NX release version
+      shell: bash
+      run: npx nx release version --skip-publish
+      env:
+        NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
+
+    - name: Push changes and tags
+      shell: bash
+      run: |
+        git push
+        git push --tags
+
+    - name: Run NX release publish
+      shell: bash
+      run: npx nx release publish
+      env:
+        NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
+        NPM_CONFIG_PROVENANCE: true
+        NPM_CONFIG_LEGACY_PEER_DEPS: false

@@ -1,0 +1,27 @@
+name: 'Setup Environment'
+description: 'Sets up Node.js environment for Kessel SDK Browser'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Read .nvmrc
+      id: node-version
+      shell: bash
+      run: echo "NODE_VERSION=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ steps.node-version.outputs.NODE_VERSION }}
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Update npm
+      shell: bash
+      run: npm install -g npm@latest
+
+    - name: Configure npm registry
+      shell: bash
+      run: npm config set registry https://registry.npmjs.org/
+
+    - name: Cache dependencies
+      uses: ./.github/actions/cache

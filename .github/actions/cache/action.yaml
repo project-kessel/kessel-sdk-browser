@@ -1,0 +1,13 @@
+name: 'Cache Dependencies'
+description: 'Caches node_modules based on package-lock.json'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-modules-
