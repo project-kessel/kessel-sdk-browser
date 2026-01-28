@@ -16,16 +16,42 @@ runs:
       env:
         NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
 
+    - name: Rebuild packages with new versions
+      shell: bash
+      run: npx nx run-many -t build --skipNxCache
+
     - name: Push changes and tags
       shell: bash
       run: |
         git push
         git push --tags
 
-    - name: Run NX release publish
+    - name: Verify built files
       shell: bash
-      run: npx nx release publish
-      env:
-        NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
-        NPM_CONFIG_PROVENANCE: true
-        NPM_CONFIG_LEGACY_PEER_DEPS: false
+      run: |
+        echo "Verifying built files..."
+        ls -la dist/packages/*/index.js || (echo "Built files missing!" && exit 1)
+        # Double-check that we're publishing from dist directories
+        echo "Checking package.json files in dist..."
+        for pkg in dist/packages/*/package.json; do
+          echo "=== $pkg ==="
+          cat "$pkg" | grep -E '"name"|"main"|"types"'
+        done
+
+    # Commented out for testing - uncomment when ready to publish to NPM
+    # - name: Run NX release publish
+    #   shell: bash
+    #   run: npx nx release publish
+    #   env:
+    #     NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
+    #     NPM_CONFIG_PROVENANCE: true
+    #     NPM_CONFIG_LEGACY_PEER_DEPS: false
+
+    - name: Tag last-release
+      shell: bash
+      run: |
+        git tag -f last-release
+        git push origin last-release --force
+        # push nx created tags
+        git tag -l
+        git push origin --tags
