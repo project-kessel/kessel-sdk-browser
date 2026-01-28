@@ -12,7 +12,7 @@ runs:
 
     - name: Run NX release version
       shell: bash
-      run: npx nx release version --skip-publish
+      run: npx nx release version --verbose
       env:
         NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
 
