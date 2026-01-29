@@ -23,6 +23,15 @@
   ],
   "author": "Red Hat Cloud Services",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/project-kessel/kessel-sdk-browser.git",
+    "directory": "packages/react-kessel-access-check"
+  },
+  "homepage": "https://github.com/project-kessel/kessel-sdk-browser#readme",
+  "bugs": {
+    "url": "https://github.com/project-kessel/kessel-sdk-browser/issues"
+  },
   "publishConfig": {
     "access": "public"
   },
