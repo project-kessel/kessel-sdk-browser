@@ -175,5 +175,3 @@ jobs:
 
       - name: Release
         uses: ./.github/actions/release
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

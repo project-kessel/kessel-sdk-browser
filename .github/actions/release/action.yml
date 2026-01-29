@@ -13,8 +13,6 @@ runs:
     - name: Run NX release version
       shell: bash
       run: npx nx release version --verbose
-      env:
-        NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
 
     - name: Rebuild packages with new versions
       shell: bash
@@ -43,7 +41,6 @@ runs:
     #   shell: bash
     #   run: npx nx release publish
     #   env:
-    #     NODE_AUTH_TOKEN: ${{ env.NODE_AUTH_TOKEN }}
     #     NPM_CONFIG_PROVENANCE: true
     #     NPM_CONFIG_LEGACY_PEER_DEPS: false
 
