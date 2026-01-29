@@ -71,16 +71,16 @@ jobs:
       - name: Verify build artifacts
         run: |
           echo "Verifying build artifacts..."
-          if [ ! -d "dist/@project-kessel/react-kessel-access-check" ]; then
-            echo "Build failed: dist/@project-kessel/react-kessel-access-check directory not found"
+          if [ ! -d "dist/packages/react-kessel-access-check" ]; then
+            echo "Build failed: dist/packages/react-kessel-access-check directory not found"
             exit 1
           fi
-          if [ ! -f "dist/@project-kessel/react-kessel-access-check/index.js" ]; then
-            echo "Build failed: dist/@project-kessel/react-kessel-access-check/index.js not found"
+          if [ ! -f "dist/packages/react-kessel-access-check/index.js" ]; then
+            echo "Build failed: dist/packages/react-kessel-access-check/index.js not found"
             exit 1
           fi
-          if [ ! -f "dist/@project-kessel/react-kessel-access-check/index.d.ts" ]; then
-            echo "Build failed: dist/@project-kessel/react-kessel-access-check/index.d.ts not found"
+          if [ ! -f "dist/packages/react-kessel-access-check/index.d.ts" ]; then
+            echo "Build failed: dist/packages/react-kessel-access-check/index.d.ts not found"
             exit 1
           fi
           echo "Build artifacts verified successfully"

@@ -1,5 +1,5 @@
 {
-  "name": "@project-kessel/react-kessel-access-check",
+  "name": "react-kessel-access-check",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/react-kessel-access-check/src",
   "projectType": "library",
@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "rootDir": "packages/react-kessel-access-check/src",
-        "outputPath": "dist/@project-kessel/react-kessel-access-check",
+        "outputPath": "dist/packages/react-kessel-access-check",
         "main": "packages/react-kessel-access-check/src/index.ts",
         "tsConfig": "packages/react-kessel-access-check/tsconfig.lib.json",
         "assets": []

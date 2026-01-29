@@ -41,7 +41,7 @@
   "targetDefaults": {
     "nx-release-publish": {
       "options": {
-        "packageRoot": "dist/{projectName}"
+        "packageRoot": "dist/{projectRoot}"
       }
     },
     "@nx/js:tsc": {
@@ -80,7 +80,7 @@
       },
       "manifestRootsToUpdate": [
         "{projectRoot}",
-        "dist/{projectName}"
+        "dist/packages/{projectName}"
       ]
     },
     "changelog": {
