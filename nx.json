@@ -90,6 +90,6 @@
         "createReleaseInGitHub": false
       }
     },
-    "releaseTagPattern": "{projectName}-{version}"
+    "releaseTagPattern": "{projectName}@{version}"
   }
 }
