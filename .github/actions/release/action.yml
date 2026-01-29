@@ -36,13 +36,12 @@ runs:
           cat "$pkg" | grep -E '"name"|"main"|"types"'
         done
 
-    # Commented out for testing - uncomment when ready to publish to NPM
-    # - name: Run NX release publish
-    #   shell: bash
-    #   run: npx nx release publish
-    #   env:
-    #     NPM_CONFIG_PROVENANCE: true
-    #     NPM_CONFIG_LEGACY_PEER_DEPS: false
+    - name: Run NX release publish
+      shell: bash
+      run: npx nx release publish
+      env:
+        NPM_CONFIG_PROVENANCE: true
+        NPM_CONFIG_LEGACY_PEER_DEPS: false
 
     - name: Tag last-release
       shell: bash
