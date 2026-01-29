@@ -14,6 +14,7 @@ runs:
       with:
         node-version: ${{ steps.node-version.outputs.NODE_VERSION }}
         registry-url: 'https://registry.npmjs.org'
+        cache: 'npm'
 
     - name: Update npm
       shell: bash
@@ -22,6 +23,3 @@ runs:
     - name: Configure npm registry
       shell: bash
       run: npm config set registry https://registry.npmjs.org/
-
-    - name: Cache dependencies
-      uses: ./.github/actions/cache
