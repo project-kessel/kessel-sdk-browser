@@ -87,7 +87,7 @@
       "workspaceChangelog": false,
       "projectChangelogs": {
         "file": "{projectRoot}/CHANGELOG.md",
-        "createReleaseInGitHub": false
+        "createReleaseInGitHub": true
       }
     },
     "releaseTagPattern": "{projectName}@{version}"
