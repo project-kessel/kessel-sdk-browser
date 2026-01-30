@@ -166,11 +166,6 @@ kessel-sdk-browser/
 │       └── jest.config.js
 ├── examples/
 │   └── demo-react-kessel-access-check/ # Example React app
-├── dist/                              # Build outputs (generated)
-│   └── packages/
-│       └── react-kessel-access-check/
-├── node_modules/                      # Shared dependencies
-│
 ├── .commitlintrc.json                 # Commit message validation
 ├── package.json                       # Root workspace configuration
 ├── nx.json                            # NX workspace configuration
