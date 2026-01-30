@@ -806,6 +806,3 @@ If the `loading` state never changes to `false`, check:
 2. Console for any JavaScript errors
 3. That the API endpoint is responding correctly
 4. That there are no network errors or timeouts
-
-This project uses **NX** for build tooling, which provides intelligent caching and faster builds. NX will cache successful builds and tests, making subsequent runs significantly faster.
-

@@ -58,7 +58,7 @@ See [packages/react-kessel-access-check](./packages/react-kessel-access-check) f
 
 For comprehensive documentation, see:
 
-- **[Frontend Kessel Access Checks](./packages/react-kessel-access-check)** - React SDK for browser-based access checks
+- **[@project-kessel/react-kessel-access-check](./packages/react-kessel-access-check)** - React SDK for browser-based access checks
   - Single and bulk permission checks
   - React Context integration
   - TypeScript support with function overloads
@@ -144,23 +144,34 @@ npm run typecheck
 
 ```
 kessel-sdk-browser/
+├── .github/
+│   ├── workflows/
+│   │   └── ci.yaml                    # CI/CD pipeline
+│   └── actions/
+│       └── release/                   # Release automation
 ├── packages/
-│   └── react-kessel-access-check/          # React SDK for browser
+│   └── react-kessel-access-check/
 │       ├── src/
+│       │   ├── core/                  # Core utilities
+│       │   ├── AccessCheckContext.tsx
 │       │   ├── AccessCheckProvider.tsx
 │       │   ├── hooks.ts
 │       │   ├── types.ts
 │       │   └── index.ts
 │       ├── package.json
 │       ├── project.json               # NX project configuration
+│       ├── CHANGELOG.md               # Auto-generated changelog
 │       ├── tsconfig.lib.json
+│       ├── tsconfig.spec.json
 │       └── jest.config.js
-│
-├── node_modules/                      # Shared dependencies
-├── dist/                              # Build outputs
+├── examples/
+│   └── demo-react-kessel-access-check/ # Example React app
+├── dist/                              # Build outputs (generated)
 │   └── packages/
 │       └── react-kessel-access-check/
+├── node_modules/                      # Shared dependencies
 │
+├── .commitlintrc.json                 # Commit message validation
 ├── package.json                       # Root workspace configuration
 ├── nx.json                            # NX workspace configuration
 ├── tsconfig.base.json                 # Shared TypeScript config
@@ -199,21 +210,46 @@ fix(react-kessel-access-check): resolve TypeScript type errors
 docs(readme): update installation instructions
 ```
 
-## Publishing Packages
+## Automated Releases
 
-The package can be published:
+This repository uses automated releases powered by NX and GitHub Actions. When commits are pushed to the `master` branch, the release process automatically:
+
+1. Analyzes commit messages using conventional commits
+2. Determines the appropriate version bump
+3. Updates package versions and changelogs
+4. Creates git tags
+5. Publishes packages to npm
+
+### Version Bumping Rules
+
+The version bump is determined by the commit type following the conventional commits specification:
+
+- `fix:` → **patch bump** (0.0.x) - Bug fixes
+- `feat:` → **minor bump** (0.x.0) - New features
+- `BREAKING CHANGE:` → **major bump** (x.0.0) - Breaking changes (in commit footer)
+- Other types (`chore:`, `docs:`, `style:`, `refactor:`, `test:`, `ci:`, `build:`) → **no version bump**
+
+### Example Release Flow
 
 ```bash
-# Publish react-kessel-access-check
-cd packages/react-kessel-access-check
-npm publish
+# A fix commit triggers a patch release
+git commit -m "fix(react-kessel-access-check): resolve TypeScript type errors"
+# Push to master → releases version 0.2.4 → 0.2.5
+
+# A feature commit triggers a minor release
+git commit -m "feat(react-kessel-access-check): add caching for access check results"
+# Push to master → releases version 0.2.5 → 0.3.0
+
+# A breaking change triggers a major release (using ! syntax)
+git commit -m "feat(react-kessel-access-check)!: redesign API surface"
+# Push to master → releases version 0.3.0 → 1.0.0
+
+# Or with BREAKING CHANGE footer (requires multiple -m flags)
+git commit -m "feat(react-kessel-access-check): redesign API surface" \
+           -m "BREAKING CHANGE: The AccessCheck provider now requires explicit configuration"
+# Push to master → releases version 0.3.0 → 1.0.0
 ```
 
-Or use NX release management:
-
-```bash
-npx nx release
-```
 
 ## License
 
