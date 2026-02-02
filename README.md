@@ -31,7 +31,7 @@ function App() {
   return (
     <AccessCheck.Provider
       baseUrl="https://console.redhat.com"
-      apiPath="/api/inventory/v1beta2"
+      apiPath="/api/kessel/v1beta2"
     >
       <YourApplication />
     </AccessCheck.Provider>

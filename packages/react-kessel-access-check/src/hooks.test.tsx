@@ -15,7 +15,7 @@ describe('useSelfAccessCheck', () => {
 
   // Wrapper component for tests that provides context
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <AccessCheck.Provider baseUrl="https://api.example.com" apiPath="/api/inventory/v1beta2">
+    <AccessCheck.Provider baseUrl="https://api.example.com" apiPath="/api/kessel/v1beta2">
       {children}
     </AccessCheck.Provider>
   );
@@ -57,7 +57,7 @@ describe('useSelfAccessCheck', () => {
 
       // Verify fetch was called correctly
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.example.com/api/inventory/v1beta2/checkself',
+        'https://api.example.com/api/kessel/v1beta2/checkself',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -312,7 +312,7 @@ describe('useSelfAccessCheck', () => {
 
       // Verify fetch was called correctly
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.example.com/api/inventory/v1beta2/checkselfbulk',
+        'https://api.example.com/api/kessel/v1beta2/checkselfbulk',
         expect.objectContaining({
           method: 'POST',
           headers: {
@@ -404,7 +404,7 @@ describe('useSelfAccessCheck', () => {
       await waitFor(() => expect(result.current.loading).toBe(false));
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.example.com/api/inventory/v1beta2/checkselfbulk',
+        'https://api.example.com/api/kessel/v1beta2/checkselfbulk',
         expect.objectContaining({
           body: JSON.stringify({
             items: [
@@ -473,7 +473,7 @@ describe('useSelfAccessCheck', () => {
 
       // Verify fetch was called correctly
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.example.com/api/inventory/v1beta2/checkselfbulk',
+        'https://api.example.com/api/kessel/v1beta2/checkselfbulk',
         expect.objectContaining({
           body: JSON.stringify({
             items: [
@@ -578,7 +578,7 @@ describe('useSelfAccessCheck', () => {
       await waitFor(() => expect(result.current.loading).toBe(false));
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.example.com/api/inventory/v1beta2/checkselfbulk',
+        'https://api.example.com/api/kessel/v1beta2/checkselfbulk',
         expect.objectContaining({
           body: JSON.stringify({
             items: [

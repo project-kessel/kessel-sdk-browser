@@ -13,7 +13,7 @@ function App() {
   return (
     <AccessCheck.Provider
       baseUrl="http://localhost:3000"  // MSW intercepts all requests locally
-      apiPath="/api/inventory/v1beta2"
+      apiPath="/api/kessel/v1beta2"
     >
       <Layout>
         <Navigation activeDemo={activeDemo} onSelectDemo={setActiveDemo} />

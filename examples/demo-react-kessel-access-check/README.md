@@ -60,8 +60,8 @@ The demo includes:
 ### API Endpoints (Mocked)
 
 MSW intercepts these endpoints:
-- `POST /api/inventory/v1beta2/checkself` - Single resource check
-- `POST /api/inventory/v1beta2/checkselfbulk` - Bulk resource check
+- `POST /api/kessel/v1beta2/checkself` - Single resource check
+- `POST /api/kessel/v1beta2/checkselfbulk` - Bulk resource check
 
 ## Project Structure
 
@@ -100,7 +100,7 @@ function App() {
   return (
     <AccessCheck.Provider
       baseUrl=""
-      apiPath="/api/inventory/v1beta2"
+      apiPath="/api/kessel/v1beta2"
     >
       <YourApp />
     </AccessCheck.Provider>
@@ -184,7 +184,7 @@ Example:
 ```tsx
 <AccessCheck.Provider
   baseUrl="https://api.your-domain.com"
-  apiPath="/api/inventory/v1beta2"
+  apiPath="/api/kessel/v1beta2"
 >
   <App />
 </AccessCheck.Provider>

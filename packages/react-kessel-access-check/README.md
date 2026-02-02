@@ -52,7 +52,7 @@ function App() {
   return (
     <AccessCheck.Provider
       baseUrl="https://console.redhat.com"
-      apiPath="/api/inventory/v1beta2"
+      apiPath="/api/kessel/v1beta2"
     >
       <YourApplication />
     </AccessCheck.Provider>
@@ -89,7 +89,7 @@ The main provider component that wraps your application and provides access chec
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `baseUrl` | `string` | Yes | The base URL for the API server (e.g., `https://console.redhat.com`) |
-| `apiPath` | `string` | Yes | The base path for the access check API endpoints (e.g., `/api/inventory/v1beta2`) |
+| `apiPath` | `string` | Yes | The base path for the access check API endpoints (e.g., `/api/kessel/v1beta2`) |
 | `children` | `ReactNode` | Yes | Child components that will have access to the access check hooks |
 
 #### Example
@@ -97,7 +97,7 @@ The main provider component that wraps your application and provides access chec
 ```jsx
 <AccessCheck.Provider
   baseUrl="https://console.redhat.com"
-  apiPath="/api/inventory/v1beta2"
+  apiPath="/api/kessel/v1beta2"
 >
   <App />
 </AccessCheck.Provider>
@@ -438,7 +438,7 @@ The `AccessCheck.Provider` requires both `baseUrl` and `apiPath` props to be pro
 // Development
 <AccessCheck.Provider
   baseUrl="http://localhost:8000"
-  apiPath="/api/inventory/v1beta2"
+  apiPath="/api/kessel/v1beta2"
 >
   <App />
 </AccessCheck.Provider>
@@ -446,7 +446,7 @@ The `AccessCheck.Provider` requires both `baseUrl` and `apiPath` props to be pro
 // Production
 <AccessCheck.Provider
   baseUrl="https://console.redhat.com"
-  apiPath="/api/inventory/v1beta2"
+  apiPath="/api/kessel/v1beta2"
 >
   <App />
 </AccessCheck.Provider>
@@ -557,7 +557,7 @@ This SDK expects the backend to implement two REST endpoints:
 
 ### Self Access Check
 
-**POST** `/api/inventory/v1beta2/checkself`
+**POST** `/api/kessel/v1beta2/checkself`
 
 Checks if the current user has the specified level of access to the provided resource.
 
@@ -583,7 +583,7 @@ Allowed values: `ALLOWED_UNSPECIFIED`, `ALLOWED_TRUE`, or `ALLOWED_FALSE`
 
 ### Bulk Self Access Check
 
-**POST** `/api/inventory/v1beta2/checkselfbulk`
+**POST** `/api/kessel/v1beta2/checkselfbulk`
 
 Checks if the current user has the specified level of access to multiple resources.
 
@@ -779,7 +779,7 @@ function App() {
 // ✓ Correct
 function App() {
   return (
-    <AccessCheck.Provider baseUrl="https://api.example.com" apiPath="/api/inventory/v1beta2">
+    <AccessCheck.Provider baseUrl="https://api.example.com" apiPath="/api/kessel/v1beta2">
       <MyComponent />
     </AccessCheck.Provider>
   );
