@@ -12,7 +12,9 @@
         "outputPath": "dist/packages/react-kessel-access-check",
         "main": "packages/react-kessel-access-check/src/index.ts",
         "tsConfig": "packages/react-kessel-access-check/tsconfig.lib.json",
-        "assets": ["packages/react-kessel-access-check/README.md"]
+        "assets": [
+          "packages/react-kessel-access-check/README.md"
+        ]
       }
     },
     "test": {

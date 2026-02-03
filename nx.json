@@ -66,12 +66,12 @@
   "release": {
     "projects": ["packages/*"],
     "projectsRelationship": "independent",
+    "git": {
+      "commit": true,
+      "tag": true,
+      "commitMessage": "chore(release): publish {projectName}@{version}"
+    },
     "version": {
-      "git": {
-        "commit": true,
-        "tag": true,
-        "commitMessage": "chore(release): publish {projectName}@{version}"
-      },
       "conventionalCommits": true,
       "preVersionCommand": "npx nx run-many -t build",
       "preserveLocalDependencyProtocols": false,
@@ -87,7 +87,12 @@
       "workspaceChangelog": false,
       "projectChangelogs": {
         "file": "{projectRoot}/CHANGELOG.md",
-        "createReleaseInGitHub": true
+        "createReleaseInGitHub": true,
+        "renderOptions": {
+          "authors": true,
+          "commitReferences": true,
+          "versionTitleDate": true
+        }
       }
     },
     "releaseTagPattern": "{projectName}@{version}"

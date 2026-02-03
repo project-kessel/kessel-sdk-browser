@@ -10,9 +10,9 @@ runs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-    - name: Run NX release version
+    - name: Run NX release (version and changelog)
       shell: bash
-      run: npx nx release version --verbose
+      run: npx nx release --skip-publish --verbose
 
     - name: Rebuild packages with new versions
       shell: bash
