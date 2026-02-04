@@ -8,10 +8,30 @@ import { workspaces } from '../../mocks/data';
 
 const code = `const { data, loading, error } = useSelfAccessCheck({
   resources: [
-    { id: 'ws-1', type: 'workspace', relation: 'view' },
-    { id: 'ws-1', type: 'workspace', relation: 'edit' },
-    { id: 'ws-1', type: 'workspace', relation: 'delete' },
-    { id: 'ws-1', type: 'workspace', relation: 'owner' }
+    {
+      id: 'ws-1',
+      type: 'workspace',
+      relation: 'view',
+      reporter: { type: 'service', instanceId: 'console-ui' }
+    },
+    {
+      id: 'ws-1',
+      type: 'workspace',
+      relation: 'edit',
+      reporter: { type: 'service', instanceId: 'console-ui' }
+    },
+    {
+      id: 'ws-1',
+      type: 'workspace',
+      relation: 'delete',
+      reporter: { type: 'service', instanceId: 'console-ui' }
+    },
+    {
+      id: 'ws-1',
+      type: 'workspace',
+      relation: 'owner',
+      reporter: { type: 'service', instanceId: 'console-ui' }
+    }
   ]
 });
 

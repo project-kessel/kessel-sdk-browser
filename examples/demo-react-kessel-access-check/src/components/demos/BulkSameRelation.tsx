@@ -9,9 +9,24 @@ import { workspaces } from '../../mocks/data';
 const code = `const { data, loading, error, consistencyToken } = useSelfAccessCheck({
   relation: 'delete',
   resources: [
-    { id: 'ws-1', type: 'workspace', name: 'Engineering Team' },
-    { id: 'ws-2', type: 'workspace', name: 'Marketing Hub' },
-    { id: 'ws-3', type: 'workspace', name: 'Sales Dashboard' }
+    {
+      id: 'ws-1',
+      type: 'workspace',
+      name: 'Engineering Team',
+      reporter: { type: 'service', instanceId: 'console-ui' }
+    },
+    {
+      id: 'ws-2',
+      type: 'workspace',
+      name: 'Marketing Hub',
+      reporter: { type: 'service', instanceId: 'console-ui' }
+    },
+    {
+      id: 'ws-3',
+      type: 'workspace',
+      name: 'Sales Dashboard',
+      reporter: { type: 'service', instanceId: 'console-ui' }
+    }
   ]
 });
 
