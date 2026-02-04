@@ -5,6 +5,8 @@ export { useAccessCheckContext } from './AccessCheckContext';
 // Type exports
 export type {
   NotEmptyArray,
+  ConsistencyToken,
+  ReporterReference,
   SelfAccessCheckResource,
   SelfAccessCheckResourceWithRelation,
   SelfAccessCheckError,

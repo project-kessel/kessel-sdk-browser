@@ -1,11 +1,22 @@
 // Utility type to ensure array has at least one element
 export type NotEmptyArray<T> = [T, ...T[]];
 
+// Consistency token type
+export type ConsistencyToken = {
+  token: string;
+};
+
+// Reporter reference type
+export type ReporterReference = {
+  type: string;
+  instanceId?: string;
+};
+
 // Resource types
 export type SelfAccessCheckResource = {
   id: string;
   type: string;
-  reporter: { type: string; instanceId?: string };
+  reporter: ReporterReference;
   [key: string]: unknown;
 };
 
@@ -30,9 +41,7 @@ export type BulkSelfAccessCheckCommonParams = {
   options?: {
     consistency?: {
       minimizeLatency?: boolean;
-      atLeastAsFresh?: {
-        token: string;
-      };
+      atLeastAsFresh?: ConsistencyToken;
     };
   };
 };
@@ -70,7 +79,5 @@ export type SelfAccessCheckResult = SelfAccessCheckResultCommon & {
 
 export type BulkSelfAccessCheckResult = SelfAccessCheckResultCommon & {
   data?: SelfAccessCheckResultItemWithRelation[];
-  consistencyToken?: {
-    token: string;
-  };
+  consistencyToken?: ConsistencyToken;
 };

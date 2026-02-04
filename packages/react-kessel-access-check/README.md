@@ -162,7 +162,7 @@ function useSelfAccessCheck(params: {
   options?: {
     consistency?: {
       minimizeLatency?: boolean;
-      atLeastAsFresh?: { token: string };
+      atLeastAsFresh?: ConsistencyToken;
     };
   };
 }): {
@@ -174,7 +174,7 @@ function useSelfAccessCheck(params: {
   }>;
   loading: boolean;
   error?: SelfAccessCheckError;
-  consistencyToken?: { token: string };
+  consistencyToken?: ConsistencyToken;
 }
 ```
 
@@ -208,7 +208,7 @@ function useSelfAccessCheck(params: {
   options?: {
     consistency?: {
       minimizeLatency?: boolean;
-      atLeastAsFresh?: { token: string };
+      atLeastAsFresh?: ConsistencyToken;
     };
   };
 }): {
@@ -220,7 +220,7 @@ function useSelfAccessCheck(params: {
   }>;
   loading: boolean;
   error?: SelfAccessCheckError;
-  consistencyToken?: { token: string };
+  consistencyToken?: ConsistencyToken;
 }
 ```
 
@@ -469,6 +469,7 @@ import {
   AccessCheck,
   useSelfAccessCheck,
   // Types
+  ConsistencyToken,
   SelfAccessCheckResource,
   SelfAccessCheckParams,
   BulkSelfAccessCheckParams,
@@ -513,6 +514,7 @@ const nestedCheck: BulkSelfAccessCheckResult = useSelfAccessCheck({
 ### Available Types
 
 - `NotEmptyArray<T>` - Array with at least one element
+- `ConsistencyToken` - Consistency token structure (`{ token: string }`)
 - `SelfAccessCheckResource` - Resource object with id and type
 - `SelfAccessCheckResourceWithRelation` - Resource with embedded relation
 - `SelfAccessCheckError` - Error object structure

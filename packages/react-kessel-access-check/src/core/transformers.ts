@@ -4,7 +4,7 @@ import type {
   SelfAccessCheckResultItemWithRelation,
   SelfAccessCheckError,
 } from '../types';
-import type { CheckSelfResponse, AllowedEnum, ApiErrorResponse, CheckSelfBulkResponse, CheckSelfBulkResponsePair } from './api-client';
+import type { CheckSelfResponse, AllowedEnum, CheckSelfBulkResponse, CheckSelfBulkResponsePair } from './api-client';
 
 /**
  * Maps the API's allowed enum to a boolean value
@@ -37,11 +37,11 @@ export function transformSingleResponse(
 /**
  * Transforms an API error response to the hook's error format
  */
-export function transformError(error: ApiErrorResponse): SelfAccessCheckError {
+export function transformError(error: SelfAccessCheckError): SelfAccessCheckError {
   return {
     code: error.code,
     message: error.message,
-    details: error.details || [],
+    details: error.details,
   };
 }
 
