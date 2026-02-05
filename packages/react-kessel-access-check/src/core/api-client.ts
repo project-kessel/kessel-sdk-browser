@@ -1,4 +1,11 @@
-import type { SelfAccessCheckResource, SelfAccessCheckResourceWithRelation } from '../types';
+import type {
+  SelfAccessCheckResource,
+  SelfAccessCheckResourceWithRelation,
+  SelfAccessCheckError,
+  SelfAccessCheckParams,
+  ConsistencyToken,
+  ReporterReference,
+} from '../types';
 
 // API Configuration
 export type ApiConfig = {
@@ -7,12 +14,7 @@ export type ApiConfig = {
 };
 
 // API Request/Response Types
-export type ReporterReference = {
-  type: string;
-  instanceId?: string;
-};
-
-export type CheckSelfRequest = {
+type CheckSelfRequest = {
   object: {
     resourceId: string;
     resourceType: string;
@@ -25,19 +27,11 @@ export type AllowedEnum = 'ALLOWED_TRUE' | 'ALLOWED_FALSE' | 'ALLOWED_UNSPECIFIE
 
 export type CheckSelfResponse = {
   allowed: AllowedEnum;
-  consistencyToken?: {
-    token: string;
-  };
-};
-
-export type ApiErrorResponse = {
-  code: number;
-  message: string;
-  details?: unknown[];
+  consistencyToken?: ConsistencyToken;
 };
 
 // Bulk API Request/Response Types
-export type CheckSelfBulkRequestItem = {
+type CheckSelfBulkRequestItem = {
   object: {
     resourceId: string;
     resourceType: string;
@@ -46,31 +40,27 @@ export type CheckSelfBulkRequestItem = {
   relation: string;
 };
 
-export type CheckSelfBulkRequest = {
+type CheckSelfBulkRequest = {
   items: CheckSelfBulkRequestItem[];
   consistency?: {
     minimizeLatency?: boolean;
-    atLeastAsFresh?: {
-      token: string;
-    };
+    atLeastAsFresh?: ConsistencyToken;
   };
 };
 
-export type CheckSelfBulkResponseItem = {
+type CheckSelfBulkResponseItem = {
   allowed: AllowedEnum;
 };
 
 export type CheckSelfBulkResponsePair = {
   request: CheckSelfBulkRequestItem;
   item: CheckSelfBulkResponseItem;
-  error?: ApiErrorResponse;
+  error?: SelfAccessCheckError;
 };
 
 export type CheckSelfBulkResponse = {
   pairs: CheckSelfBulkResponsePair[];
-  consistencyToken?: {
-    token: string;
-  };
+  consistencyToken?: ConsistencyToken;
 };
 
 /**
@@ -78,10 +68,7 @@ export type CheckSelfBulkResponse = {
  */
 export async function checkSelf(
   config: ApiConfig,
-  params: {
-    resource: SelfAccessCheckResource;
-    relation: string;
-  }
+  params: SelfAccessCheckParams
 ): Promise<CheckSelfResponse> {
   const url = `${config.baseUrl}${config.apiPath}/checkself`;
 
@@ -105,7 +92,7 @@ export async function checkSelf(
 
   if (!response.ok) {
     // Try to parse error response
-    let errorData: ApiErrorResponse;
+    let errorData: SelfAccessCheckError;
     try {
       errorData = await response.json();
     } catch {
@@ -133,9 +120,7 @@ export async function checkSelfBulk(
     }>;
     consistency?: {
       minimizeLatency?: boolean;
-      atLeastAsFresh?: {
-        token: string;
-      };
+      atLeastAsFresh?: ConsistencyToken;
     };
   }
 ): Promise<CheckSelfBulkResponse> {
@@ -164,7 +149,7 @@ export async function checkSelfBulk(
 
   if (!response.ok) {
     // Try to parse error response
-    let errorData: ApiErrorResponse;
+    let errorData: SelfAccessCheckError;
     try {
       errorData = await response.json();
     } catch {
