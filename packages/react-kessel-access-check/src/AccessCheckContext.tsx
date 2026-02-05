@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import { BulkCheckConfig } from './core/api-client';
 
 /**
  * Context value containing configuration for access checks
@@ -7,6 +8,7 @@ import { createContext, useContext } from 'react';
 export type AccessCheckContextValue = {
   baseUrl: string;
   apiPath: string;
+  bulkCheckConfig?: BulkCheckConfig
 };
 
 /**
