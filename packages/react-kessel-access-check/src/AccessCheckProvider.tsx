@@ -1,16 +1,19 @@
 import React, { ReactNode, useMemo } from 'react';
 import { AccessCheckContext } from './AccessCheckContext';
+import { ApiConfig, BulkCheckConfig } from './core/api-client';
 
 interface AccessCheckProviderProps {
   baseUrl: string;
   apiPath: string;
   children: ReactNode;
+  bulkCheckConfig?: BulkCheckConfig;
 }
 
 const Provider: React.FC<AccessCheckProviderProps> = ({
   baseUrl,
   apiPath,
   children,
+  bulkCheckConfig,
 }) => {
   // Validate props
   if (process.env.NODE_ENV !== 'production') {
@@ -27,12 +30,13 @@ const Provider: React.FC<AccessCheckProviderProps> = ({
   }
 
   // Memoize context value to prevent unnecessary re-renders
-  const contextValue = useMemo(
+  const contextValue = useMemo<ApiConfig>(
     () => ({
       baseUrl,
       apiPath,
+      bulkCheckConfig: bulkCheckConfig
     }),
-    [baseUrl, apiPath]
+    [baseUrl, apiPath, bulkCheckConfig]
   );
 
   return (
