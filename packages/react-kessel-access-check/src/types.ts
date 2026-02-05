@@ -1,5 +1,5 @@
 // Utility type to ensure array has at least one element
-export type NotEmptyArray<T> = [T, ...T[]];
+type NotEmptyArray<T> = [T, ...T[]];
 
 // Consistency token type
 export type ConsistencyToken = {
@@ -37,7 +37,7 @@ export type SelfAccessCheckParams = {
   resource: SelfAccessCheckResource;
 };
 
-export type BulkSelfAccessCheckCommonParams = {
+type BulkSelfAccessCheckCommonParams = {
   options?: {
     consistency?: {
       minimizeLatency?: boolean;
@@ -68,7 +68,7 @@ export type SelfAccessCheckResultItemWithRelation = SelfAccessCheckResultItem & 
   error?: SelfAccessCheckError;
 };
 
-export type SelfAccessCheckResultCommon = {
+type SelfAccessCheckResultCommon = {
   loading: boolean;
   error?: SelfAccessCheckError;
 };
