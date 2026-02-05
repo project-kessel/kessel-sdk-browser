@@ -34,7 +34,7 @@ const Provider: React.FC<AccessCheckProviderProps> = ({
     () => ({
       baseUrl,
       apiPath,
-      bulkConfig: bulkCheckConfig
+      bulkCheckConfig: bulkCheckConfig
     }),
     [baseUrl, apiPath, bulkCheckConfig]
   );
