@@ -63,7 +63,11 @@ function App() {
 function WorkspaceView({ workspaceId }) {
   const { data, loading, error } = useSelfAccessCheck({
     relation: 'view',
-    resource: { id: workspaceId, type: 'workspace' }
+    resource: {
+      id: workspaceId,
+      type: 'workspace',
+      reporter: { type: 'rbac' }
+    }
   });
 
   if (loading) {
@@ -90,6 +94,7 @@ The main provider component that wraps your application and provides access chec
 |------|------|----------|-------------|
 | `baseUrl` | `string` | Yes | The base URL for the API server (e.g., `https://console.redhat.com`) |
 | `apiPath` | `string` | Yes | The base path for the access check API endpoints (e.g., `/api/kessel/v1beta2`) |
+| `bulkCheckConfig` | `{ bulkRequestLimit?: number }` | No | Configuration for bulk access checks. Set `bulkRequestLimit` to limit the number of items per bulk request |
 | `children` | `ReactNode` | Yes | Child components that will have access to the access check hooks |
 
 #### Example
@@ -118,6 +123,7 @@ function useSelfAccessCheck(params: {
   resource: {
     id: string;
     type: string;
+    reporter: { type: string; instanceId?: string };
     [key: string]: unknown;
   };
 }): {
@@ -134,7 +140,11 @@ function useSelfAccessCheck(params: {
 ```jsx
 const { data, loading, error } = useSelfAccessCheck({
   relation: 'delete',
-  resource: { id: 'ws-123', type: 'workspace' }
+  resource: {
+    id: 'ws-123',
+    type: 'workspace',
+    reporter: { type: 'rbac' }
+  }
 });
 
 if (loading) return <Spinner />;
@@ -156,8 +166,8 @@ Check the same relation across multiple resources.
 function useSelfAccessCheck(params: {
   relation: string;
   resources: [
-    { id: string; type: string; [key: string]: unknown },
-    ...Array<{ id: string; type: string; [key: string]: unknown }>
+    { id: string; type: string; reporter: { type: string; instanceId?: string }; [key: string]: unknown },
+    ...Array<{ id: string; type: string; reporter: { type: string; instanceId?: string }; [key: string]: unknown }>
   ];
   options?: {
     consistency?: {
@@ -183,9 +193,9 @@ function useSelfAccessCheck(params: {
 const { data: checks, loading } = useSelfAccessCheck({
   relation: 'delete',
   resources: [
-    { id: 'ws-1', type: 'workspace' },
-    { id: 'ws-2', type: 'workspace' },
-    { id: 'ws-3', type: 'workspace' }
+    { id: 'ws-1', type: 'workspace', reporter: { type: 'rbac' } },
+    { id: 'ws-2', type: 'workspace', reporter: { type: 'rbac' } },
+    { id: 'ws-3', type: 'workspace', reporter: { type: 'rbac' } }
   ]
 });
 
@@ -202,8 +212,8 @@ Check different relations on different resources in a single request.
 ```typescript
 function useSelfAccessCheck(params: {
   resources: [
-    { id: string; type: string; relation: string; [key: string]: unknown },
-    ...Array<{ id: string; type: string; relation: string; [key: string]: unknown }>
+    { id: string; type: string; relation: string; reporter: { type: string; instanceId?: string }; [key: string]: unknown },
+    ...Array<{ id: string; type: string; relation: string; reporter: { type: string; instanceId?: string }; [key: string]: unknown }>
   ];
   options?: {
     consistency?: {
@@ -228,9 +238,9 @@ function useSelfAccessCheck(params: {
 ```jsx
 const { data: checks, loading } = useSelfAccessCheck({
   resources: [
-    { id: 'ws-1', type: 'workspace', relation: 'delete' },
-    { id: 'ws-2', type: 'workspace', relation: 'view' },
-    { id: 'ws-3', type: 'workspace', relation: 'edit' }
+    { id: 'ws-1', type: 'workspace', relation: 'delete', reporter: { type: 'rbac' } },
+    { id: 'ws-2', type: 'workspace', relation: 'view', reporter: { type: 'rbac' } },
+    { id: 'ws-3', type: 'workspace', relation: 'edit', reporter: { type: 'rbac' } }
   ]
 });
 
@@ -250,7 +260,11 @@ import { useSelfAccessCheck } from '@project-kessel/react-kessel-access-check';
 function WorkspaceActions({ workspaceId }) {
   const { data: deleteCheck, loading } = useSelfAccessCheck({
     relation: 'delete',
-    resource: { id: workspaceId, type: 'workspace' }
+    resource: {
+      id: workspaceId,
+      type: 'workspace',
+      reporter: { type: 'rbac' }
+    }
   });
 
   if (loading) return <Spinner />;
@@ -275,7 +289,11 @@ import { useSelfAccessCheck } from '@project-kessel/react-kessel-access-check';
 function WorkspaceList({ workspaces }) {
   const { data: deleteChecks, loading } = useSelfAccessCheck({
     relation: 'delete',
-    resources: workspaces.map(ws => ({ id: ws.id, type: 'workspace' }))
+    resources: workspaces.map(ws => ({
+      id: ws.id,
+      type: 'workspace',
+      reporter: { type: 'rbac' }
+    }))
   });
 
   if (loading) return <Spinner />;
@@ -309,9 +327,9 @@ import { useSelfAccessCheck } from '@project-kessel/react-kessel-access-check';
 function WorkspacePermissions({ workspaceId }) {
   const { data: checks, loading } = useSelfAccessCheck({
     resources: [
-      { id: workspaceId, type: 'workspace', relation: 'view' },
-      { id: workspaceId, type: 'workspace', relation: 'edit' },
-      { id: workspaceId, type: 'workspace', relation: 'delete' }
+      { id: workspaceId, type: 'workspace', relation: 'view', reporter: { type: 'rbac' } },
+      { id: workspaceId, type: 'workspace', relation: 'edit', reporter: { type: 'rbac' } },
+      { id: workspaceId, type: 'workspace', relation: 'delete', reporter: { type: 'rbac' } }
     ]
   });
 
@@ -341,9 +359,9 @@ import { useSelfAccessCheck } from '@project-kessel/react-kessel-access-check';
 function ResourceActions({ resourceId, resourceType }) {
   const { data: checks, loading } = useSelfAccessCheck({
     resources: [
-      { id: resourceId, type: resourceType, relation: 'view' },
-      { id: resourceId, type: resourceType, relation: 'edit' },
-      { id: resourceId, type: resourceType, relation: 'delete' }
+      { id: resourceId, type: resourceType, relation: 'view', reporter: { type: 'rbac' } },
+      { id: resourceId, type: resourceType, relation: 'edit', reporter: { type: 'rbac' } },
+      { id: resourceId, type: resourceType, relation: 'delete', reporter: { type: 'rbac' } }
     ]
   });
 
@@ -378,7 +396,11 @@ import { useSelfAccessCheck } from '@project-kessel/react-kessel-access-check';
 function FilteredWorkspaceList({ allWorkspaces }) {
   const { data: viewChecks, loading } = useSelfAccessCheck({
     relation: 'view',
-    resources: allWorkspaces.map(ws => ({ id: ws.id, type: 'workspace' }))
+    resources: allWorkspaces.map(ws => ({
+      id: ws.id,
+      type: 'workspace',
+      reporter: { type: 'rbac' }
+    }))
   });
 
   if (loading) return <Spinner />;
@@ -410,7 +432,11 @@ function WorkspaceManager({ workspaces }) {
 
   const { data: checks, consistencyToken: newToken } = useSelfAccessCheck({
     relation: 'edit',
-    resources: workspaces.map(ws => ({ id: ws.id, type: 'workspace' })),
+    resources: workspaces.map(ws => ({
+      id: ws.id,
+      type: 'workspace',
+      reporter: { type: 'rbac' }
+    })),
     options: {
       consistency: {
         minimizeLatency: false,
@@ -482,6 +508,7 @@ import {
 const resource: SelfAccessCheckResource = {
   id: 'ws-123',
   type: 'workspace',
+  reporter: { type: 'rbac' },
   // Can include additional properties
   name: 'My Workspace'
 };
@@ -496,16 +523,16 @@ const singleCheck: SelfAccessCheckResult = useSelfAccessCheck({
 const bulkCheck: BulkSelfAccessCheckResult = useSelfAccessCheck({
   relation: 'view',
   resources: [
-    { id: 'id1', type: 'workspace' },
-    { id: 'id2', type: 'workspace' }
+    { id: 'id1', type: 'workspace', reporter: { type: 'rbac' } },
+    { id: 'id2', type: 'workspace', reporter: { type: 'rbac' } }
   ]
 });
 
 // Bulk check - nested relations
 const nestedCheck: BulkSelfAccessCheckResult = useSelfAccessCheck({
   resources: [
-    { id: 'id1', type: 'workspace', relation: 'delete' },
-    { id: 'id2', type: 'workspace', relation: 'edit' }
+    { id: 'id1', type: 'workspace', relation: 'delete', reporter: { type: 'rbac' } },
+    { id: 'id2', type: 'workspace', relation: 'edit', reporter: { type: 'rbac' } }
   ]
 });
 ```
@@ -680,7 +707,11 @@ Always handle the loading state while checks are in progress:
 ```jsx
 const { data, loading, error } = useSelfAccessCheck({
   relation: 'delete',
-  resource: { id: resourceId, type: 'workspace' }
+  resource: {
+    id: resourceId,
+    type: 'workspace',
+    reporter: { type: 'rbac' }
+  }
 });
 
 if (loading) return <Spinner />;
@@ -695,14 +726,22 @@ When checking the same permission across multiple resources, always use the bulk
 // Good
 const { data: checks } = useSelfAccessCheck({
   relation: 'delete',
-  resources: workspaces.map(ws => ({ id: ws.id, type: 'workspace' }))
+  resources: workspaces.map(ws => ({
+    id: ws.id,
+    type: 'workspace',
+    reporter: { type: 'rbac' }
+  }))
 });
 
 // Avoid - triggers multiple API calls
 workspaces.forEach(ws => {
   const { data } = useSelfAccessCheck({
     relation: 'delete',
-    resource: { id: ws.id, type: 'workspace' }
+    resource: {
+      id: ws.id,
+      type: 'workspace',
+      reporter: { type: 'rbac' }
+    }
   });
 });
 ```
@@ -714,9 +753,9 @@ When checking multiple different permissions, use nested relations:
 ```jsx
 const { data: checks } = useSelfAccessCheck({
   resources: [
-    { id: wsId, type: 'workspace', relation: 'view' },
-    { id: wsId, type: 'workspace', relation: 'edit' },
-    { id: wsId, type: 'workspace', relation: 'delete' }
+    { id: wsId, type: 'workspace', relation: 'view', reporter: { type: 'rbac' } },
+    { id: wsId, type: 'workspace', relation: 'edit', reporter: { type: 'rbac' } },
+    { id: wsId, type: 'workspace', relation: 'delete', reporter: { type: 'rbac' } }
   ]
 });
 ```
@@ -758,7 +797,11 @@ Place the `AccessCheck.Provider` as high as possible in your component tree, typ
 
 **Relations**: `view`, `edit`, `delete`, `create`, `move`, `rename`, `role_bindings_view`, `role_bindings_grant`, `role_bindings_revoke`, etc.
 
-Resources are objects with `id` and `type` properties, and can include additional metadata.
+**Reporter Field**: All resources must include a `reporter` object that identifies the service or system making the access check request:
+- `{ type: 'rbac' }` - For RBAC-based authorization (most common)
+- `{ type: 'service', instanceId: 'console-ui' }` - For service-specific authorization with an optional instance identifier
+
+Resources are objects with `id`, `type`, and `reporter` properties, and can include additional metadata.
 
 ### 8. Handle Per-Item Errors
 
@@ -767,7 +810,11 @@ When using bulk checks, check for per-item errors:
 ```jsx
 const { data: checks } = useSelfAccessCheck({
   relation: 'delete',
-  resources: workspaces.map(ws => ({ id: ws.id, type: 'workspace' }))
+  resources: workspaces.map(ws => ({
+    id: ws.id,
+    type: 'workspace',
+    reporter: { type: 'rbac' }
+  }))
 });
 
 const errors = checks?.filter(check => check.error);
@@ -787,7 +834,10 @@ This error occurs when you try to use `useSelfAccessCheck` outside of an `Access
 ```jsx
 // ✗ Wrong
 function App() {
-  const { data } = useSelfAccessCheck({ relation: 'view', resource: { id: '1', type: 'workspace' } });
+  const { data } = useSelfAccessCheck({
+    relation: 'view',
+    resource: { id: '1', type: 'workspace', reporter: { type: 'rbac' } }
+  });
   return <div>...</div>;
 }
 
@@ -801,7 +851,10 @@ function App() {
 }
 
 function MyComponent() {
-  const { data } = useSelfAccessCheck({ relation: 'view', resource: { id: '1', type: 'workspace' } });
+  const { data } = useSelfAccessCheck({
+    relation: 'view',
+    resource: { id: '1', type: 'workspace', reporter: { type: 'rbac' } }
+  });
   return <div>...</div>;
 }
 ```
