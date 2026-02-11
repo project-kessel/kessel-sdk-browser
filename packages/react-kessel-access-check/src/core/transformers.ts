@@ -2,14 +2,13 @@ import type {
   SelfAccessCheckResource,
   SelfAccessCheckResultItem,
   SelfAccessCheckResultItemWithRelation,
-  SelfAccessCheckError,
 } from '../types';
-import type { CheckSelfResponse, AllowedEnum, ApiErrorResponse, CheckSelfBulkResponse, CheckSelfBulkResponsePair } from './api-client';
+import type { CheckSelfResponse, AllowedEnum, CheckSelfBulkResponse, CheckSelfBulkResponsePair } from './api-client';
 
 /**
  * Maps the API's allowed enum to a boolean value
  */
-export function mapAllowedEnum(allowed: AllowedEnum): boolean {
+function mapAllowedEnum(allowed: AllowedEnum): boolean {
   switch (allowed) {
     case 'ALLOWED_TRUE':
       return true;
@@ -35,17 +34,6 @@ export function transformSingleResponse(
 }
 
 /**
- * Transforms an API error response to the hook's error format
- */
-export function transformError(error: ApiErrorResponse): SelfAccessCheckError {
-  return {
-    code: error.code,
-    message: error.message,
-    details: error.details || [],
-  };
-}
-
-/**
  * Transforms a bulk response to the hook's expected format.
  * Maps each response pair back to the original resource with relation.
  */
@@ -65,7 +53,7 @@ export function transformBulkResponse(
 
     // Include per-item error if present
     if (pair.error) {
-      result.error = transformError(pair.error);
+      result.error = pair.error;
     }
 
     return result;

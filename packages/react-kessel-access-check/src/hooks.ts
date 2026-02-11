@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAccessCheckContext } from './AccessCheckContext';
 import { checkSelf, checkSelfBulk, ApiConfig } from './core/api-client';
-import { transformSingleResponse, transformBulkResponse, transformError } from './core/transformers';
+import { transformSingleResponse, transformBulkResponse } from './core/transformers';
 import type {
   SelfAccessCheckParams,
   BulkSelfAccessCheckParams,
@@ -37,9 +37,12 @@ function createInitialState<TData>(): AccessCheckState<TData> {
  * Handles errors from API calls in a consistent way
  */
 function handleApiError(err: unknown): SelfAccessCheckError {
-  return transformError(
-    err as { code: number; message: string; details?: unknown[] }
-  );
+  const error = err as { code: number; message: string; details?: unknown[] };
+  return {
+    code: error.code,
+    message: error.message,
+    details: error.details || [],
+  };
 }
 
 /**

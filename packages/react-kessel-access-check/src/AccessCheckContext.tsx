@@ -5,7 +5,7 @@ import { BulkCheckConfig } from './core/api-client';
  * Context value containing configuration for access checks
  * Can be extended in the future with cache, deduplication state, etc.
  */
-export type AccessCheckContextValue = {
+type AccessCheckContextValue = {
   baseUrl: string;
   apiPath: string;
   bulkCheckConfig?: BulkCheckConfig

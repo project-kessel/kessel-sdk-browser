@@ -89,7 +89,7 @@
         "file": "{projectRoot}/CHANGELOG.md",
         "createReleaseInGitHub": true,
         "renderOptions": {
-          "authors": true,
+          "authors": false,
           "commitReferences": true,
           "versionTitleDate": true
         }
