@@ -110,7 +110,10 @@ function App() {
 function WorkspaceActions({ workspace }) {
   const { data, loading, error } = useSelfAccessCheck({
     relation: 'delete',
-    resource: workspace
+    resource: {
+      ...workspace,
+      reporter: { type: 'service', instanceId: 'console-ui' }
+    }
   });
 
   if (loading) return <Spinner />;
@@ -128,7 +131,10 @@ function WorkspaceActions({ workspace }) {
 // Check same permission on multiple resources
 const { data } = useSelfAccessCheck({
   relation: 'edit',
-  resources: allWorkspaces
+  resources: allWorkspaces.map(ws => ({
+    ...ws,
+    reporter: { type: 'service', instanceId: 'console-ui' }
+  }))
 });
 
 const editableWorkspaces = data?.filter(r => r.allowed) || [];
@@ -141,6 +147,9 @@ const { data } = useSelfAccessCheck({
     { ...workspace, relation: 'delete' }
   ]
 });
+
+// Note: workspace objects must include the required 'reporter' field:
+// { id, type, reporter: { type, instanceId? }, ...customFields }
 ```
 
 ## Development

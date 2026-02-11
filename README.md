@@ -42,7 +42,11 @@ function App() {
 function WorkspaceView({ workspaceId }) {
   const { data, loading } = useSelfAccessCheck({
     relation: 'view',
-    resource: { id: workspaceId, type: 'workspace' }
+    resource: {
+      id: workspaceId,
+      type: 'workspace',
+      reporter: { type: 'rbac' }
+    }
   });
 
   if (loading) return <Spinner />;

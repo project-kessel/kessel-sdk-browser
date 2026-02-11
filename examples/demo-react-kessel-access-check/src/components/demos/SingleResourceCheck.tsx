@@ -12,7 +12,8 @@ const code = `const { data, loading, error } = useSelfAccessCheck({
   resource: {
     id: 'ws-1',
     type: 'workspace',
-    name: 'Engineering Team'
+    name: 'Engineering Team',
+    reporter: { type: 'service', instanceId: 'console-ui' }
   }
 });
 
