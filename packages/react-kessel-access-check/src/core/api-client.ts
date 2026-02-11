@@ -36,7 +36,7 @@ export type CheckSelfResponse = {
 };
 
 // Bulk API Request/Response Types
-type CheckSelfBulkRequestItem = {
+export type CheckSelfBulkRequestItem = {
   object: {
     resourceId: string;
     resourceType: string;
@@ -45,7 +45,7 @@ type CheckSelfBulkRequestItem = {
   relation: string;
 };
 
-type CheckSelfBulkRequest = {
+export type CheckSelfBulkRequest = {
   items: CheckSelfBulkRequestItem[];
   consistency?: {
     minimizeLatency?: boolean;
