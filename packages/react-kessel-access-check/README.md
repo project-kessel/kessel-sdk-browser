@@ -1,6 +1,6 @@
 # @project-kessel/react-kessel-access-check
 
-A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities in your application.
+A React SDK for performing granular and bulk access checks against the Kessel access check service. This package provides a standardized way to verify user permissions for resources like workspaces, inventory groups, and other entities in your application. It also includes helpers for fetching workspace IDs from RBAC for use as resource IDs in access checks.
 
 ## Table of Contents
 
@@ -9,10 +9,12 @@ A React SDK for performing granular and bulk access checks against the Kessel ac
 - [API Reference](#api-reference)
   - [AccessCheck.Provider](#accesscheckprovider)
   - [useSelfAccessCheck](#useselfaccesscheck)
+  - [fetchRootWorkspace / fetchDefaultWorkspace](#fetchrootworkspace--fetchdefaultworkspace)
 - [Usage Examples](#usage-examples)
   - [Single Resource Check](#single-resource-check)
   - [Bulk Resource Check - Same Relation](#bulk-resource-check---same-relation)
   - [Bulk Resource Check - Nested Relations](#bulk-resource-check---nested-relations)
+  - [Fetching Workspace IDs for Access Checks](#fetching-workspace-ids-for-access-checks)
   - [Conditional Rendering](#conditional-rendering)
   - [Filtering Resources](#filtering-resources)
   - [Using Consistency Tokens](#using-consistency-tokens)
@@ -248,6 +250,79 @@ const { data: checks, loading } = useSelfAccessCheck({
 const errors = checks?.filter(check => check.error);
 ```
 
+### fetchRootWorkspace / fetchDefaultWorkspace
+
+Async helper functions for fetching workspace IDs from the RBAC API. These are useful when the resource you need to perform an access check against is a workspace, and you need its UUID.
+
+These call `GET /api/rbac/v2/workspaces/?type={root|default}` and return the first matching workspace.
+
+Follows the [Kessel SDK client API spec for `rbac.v2`](https://project-kessel.github.io/docs/contributing/client-api/rbacv2/).
+
+**Signature**
+```typescript
+function fetchRootWorkspace(
+  rbacBaseEndpoint: string,
+  auth?: WorkspaceAuthRequest,
+  httpClient?: HttpClient,
+): Promise<Workspace>;
+
+function fetchDefaultWorkspace(
+  rbacBaseEndpoint: string,
+  auth?: WorkspaceAuthRequest,
+  httpClient?: HttpClient,
+): Promise<Workspace>;
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `rbacBaseEndpoint` | `string` | Yes | The RBAC service endpoint URL (e.g. `https://console.redhat.com`) |
+| `auth` | `WorkspaceAuthRequest` | No | Authentication config. Pass `{ headers: { Authorization: 'Bearer ...' } }` to include the user's JWT. |
+| `httpClient` | `HttpClient` | No | A `fetch`-compatible function. When omitted, uses the global `fetch`. Allows injecting custom clients with interceptors or additional configuration. |
+
+**Types**
+
+The `Workspace` type is aligned with the [RBAC v2 OpenAPI spec](https://github.com/RedHatInsights/insights-rbac/blob/master/docs/source/specs/v2/openapi.yaml):
+
+```typescript
+type Workspace = {
+  id: string;
+  type: 'root' | 'default' | 'standard' | 'ungrouped-hosts';
+  name: string;
+  created: string;   // ISO 8601 date-time
+  modified: string;  // ISO 8601 date-time
+  parent_id?: string;
+  description?: string;
+};
+
+type WorkspaceAuthRequest = {
+  headers?: Record<string, string>;
+  credentials?: RequestCredentials;
+};
+
+type HttpClient = typeof fetch;
+```
+
+**Example — fetch a workspace ID, then use it in an access check**
+```typescript
+import { fetchDefaultWorkspace } from '@project-kessel/react-kessel-access-check';
+
+const workspace = await fetchDefaultWorkspace('https://console.redhat.com', {
+  headers: { 'Authorization': `Bearer ${token}` },
+});
+// Use workspace.id as the resource ID in an access check
+```
+
+**Example — with custom fetch client**
+```typescript
+const workspace = await fetchDefaultWorkspace(
+  'https://console.redhat.com',
+  { headers: { 'Authorization': `Bearer ${token}` } },
+  myCustomFetchWithInterceptors,
+);
+```
+
 ## Usage Examples
 
 ### Single Resource Check
@@ -346,6 +421,38 @@ function WorkspacePermissions({ workspaceId }) {
       <p>Delete: {canDelete ? '✓' : '✗'}</p>
     </div>
   );
+}
+```
+
+### Fetching Workspace IDs for Access Checks
+
+When the resource you're checking access for is a workspace, you may need its UUID from RBAC first. Use `fetchDefaultWorkspace` or `fetchRootWorkspace` to get it, then pass the ID into your access check:
+
+```jsx
+import { useState, useEffect } from 'react';
+import {
+  fetchDefaultWorkspace,
+  useSelfAccessCheck
+} from '@project-kessel/react-kessel-access-check';
+
+function WorkspaceAccessCheck({ token }) {
+  const [workspaceId, setWorkspaceId] = useState();
+
+  useEffect(() => {
+    fetchDefaultWorkspace('https://console.redhat.com', {
+      headers: { 'Authorization': `Bearer ${token}` },
+    }).then(ws => setWorkspaceId(ws.id));
+  }, [token]);
+
+  const { data, loading } = useSelfAccessCheck({
+    relation: 'view',
+    resource: { id: workspaceId ?? '', type: 'workspace' }
+  });
+
+  if (!workspaceId || loading) return <Spinner />;
+  if (!data?.allowed) return <div>Access denied</div>;
+
+  return <div>You have access to the default workspace.</div>;
 }
 ```
 
@@ -548,6 +655,10 @@ const nestedCheck: BulkSelfAccessCheckResult = useSelfAccessCheck({
 - `SelfAccessCheckResultItemWithRelation` - Individual result item in bulk check responses
 - `SelfAccessCheckResult` - Return type for single resource checks
 - `BulkSelfAccessCheckResult` - Return type for bulk resource checks
+- `Workspace` - RBAC workspace object (id, type, name, created, modified, parent_id, description)
+- `WorkspaceType` - Workspace type enum (`'root'` | `'default'` | `'standard'` | `'ungrouped-hosts'`)
+- `WorkspaceAuthRequest` - Auth config for workspace helpers (headers, credentials)
+- `HttpClient` - A `fetch`-compatible function type for custom HTTP clients
 
 ## Architecture
 
@@ -578,7 +689,7 @@ Direct async functions are better suited for:
 
 ## Backend API Integration
 
-This SDK expects the backend to implement two REST endpoints:
+This SDK interacts with the following backend REST endpoints:
 
 ### Self Access Check
 
@@ -689,6 +800,47 @@ Checks if the current user has the specified level of access to multiple resourc
   "consistencyToken": {
     "token": "ZGVhZGJlZWY="
   }
+}
+```
+
+### List Workspaces (RBAC v2)
+
+**GET** `/api/rbac/v2/workspaces/?type={type}`
+
+Retrieves workspaces filtered by type. Used by `fetchRootWorkspace` and `fetchDefaultWorkspace`.
+
+Defined in the [RBAC v2 OpenAPI spec](https://github.com/RedHatInsights/insights-rbac/blob/master/docs/source/specs/v2/openapi.yaml).
+
+**Query Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `type` | `root` \| `default` \| `standard` \| `ungrouped-hosts` \| `all` | Filter workspaces by type |
+
+**Response** (`Workspaces.WorkspaceListResponse`):
+```json
+{
+  "meta": {
+    "count": 1,
+    "limit": 10,
+    "offset": 0
+  },
+  "links": {
+    "first": "/api/rbac/v2/workspaces/?limit=10&offset=0",
+    "next": null,
+    "previous": null,
+    "last": "/api/rbac/v2/workspaces/?limit=10&offset=0"
+  },
+  "data": [
+    {
+      "id": "e4277742-b91c-43f1-a185-b827e8574345",
+      "parent_id": "c1f729e2-3e2b-4f9e-b247-a4b568393e11",
+      "type": "root",
+      "name": "Root Workspace",
+      "description": "Organization root workspace",
+      "created": "2024-08-04T12:00:00Z",
+      "modified": "2024-08-04T12:00:00Z"
+    }
+  ]
 }
 ```
 

@@ -95,3 +95,18 @@ export type BulkSelfAccessCheckResult = SelfAccessCheckResultCommon & {
   data?: SelfAccessCheckResultItemWithRelation[];
   consistencyToken?: ConsistencyToken;
 };
+
+// Workspace types
+// Aligned with RBAC v2 OpenAPI spec: Workspaces.Workspace schema
+// https://github.com/RedHatInsights/insights-rbac/blob/master/docs/source/specs/v2/openapi.yaml
+export type WorkspaceType = 'root' | 'default' | 'standard' | 'ungrouped-hosts';
+
+export type Workspace = {
+  id: string;
+  type: WorkspaceType;
+  name: string;
+  created: string;
+  modified: string;
+  parent_id?: string;
+  description?: string;
+};
