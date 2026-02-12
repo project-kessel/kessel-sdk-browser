@@ -62,6 +62,7 @@ The demo includes:
 MSW intercepts these endpoints:
 - `POST /api/inventory/v1beta2/checkself` - Single resource check
 - `POST /api/inventory/v1beta2/checkselfbulk` - Bulk resource check
+- `GET /api/rbac/v2/workspaces/?type={type}` - Workspace retrieval (root/default)
 
 ## Project Structure
 
@@ -143,6 +144,22 @@ const { data } = useSelfAccessCheck({
 });
 ```
 
+### Fetching Workspace IDs for Access Checks
+
+```tsx
+import { fetchDefaultWorkspace, useSelfAccessCheck } from '@project-kessel/react-kessel-access-check';
+
+// Get the default workspace UUID from RBAC, then use it in an access check
+const workspace = await fetchDefaultWorkspace('https://console.redhat.com', {
+  headers: { 'Authorization': `Bearer ${token}` },
+});
+
+const { data } = useSelfAccessCheck({
+  relation: 'view',
+  resource: { id: workspace.id, type: 'workspace' }
+});
+```
+
 ## Development
 
 ### Available Scripts
@@ -194,6 +211,7 @@ Example:
 
 - **Package Documentation**: See the main package README for full API reference
 - **Backend API Spec**: Required endpoints and request/response formats
+- **[RBAC v2 OpenAPI Spec](https://github.com/RedHatInsights/insights-rbac/blob/master/docs/source/specs/v2/openapi.yaml)**: Workspace API specification
 - **Best Practices**: Performance optimization and caching strategies
 
 ## License
