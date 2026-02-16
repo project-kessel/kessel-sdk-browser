@@ -5,6 +5,7 @@ export { useAccessCheckContext } from './AccessCheckContext';
 // Type exports
 export type {
   ConsistencyToken,
+  ConsistencyOptions,
   ReporterReference,
   SelfAccessCheckResource,
   SelfAccessCheckResourceWithRelation,
@@ -12,4 +13,5 @@ export type {
   SelfAccessCheckResultItemWithRelation,
   SelfAccessCheckResult,
   BulkSelfAccessCheckResult,
+  CheckSelfBulkParams,
 } from './types';

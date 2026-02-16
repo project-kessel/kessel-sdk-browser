@@ -6,6 +6,12 @@ export type ConsistencyToken = {
   token: string;
 };
 
+// Consistency options type
+export type ConsistencyOptions = {
+  minimizeLatency?: boolean;
+  atLeastAsFresh?: ConsistencyToken;
+};
+
 // Reporter reference type
 export type ReporterReference = {
   type: string;
@@ -39,10 +45,7 @@ export type SelfAccessCheckParams = {
 
 type BulkSelfAccessCheckCommonParams = {
   options?: {
-    consistency?: {
-      minimizeLatency?: boolean;
-      atLeastAsFresh?: ConsistencyToken;
-    };
+    consistency?: ConsistencyOptions;
   };
 };
 
@@ -56,6 +59,15 @@ export type BulkSelfAccessCheckNestedRelationsParams =
     relation?: never;
     resources: NotEmptyArray<SelfAccessCheckResourceWithRelation>;
   };
+
+// API client bulk params type
+export type CheckSelfBulkParams = {
+  items: Array<{
+    resource: SelfAccessCheckResource | SelfAccessCheckResourceWithRelation;
+    relation: string;
+  }>;
+  consistency?: ConsistencyOptions;
+};
 
 // Result types
 export type SelfAccessCheckResultItem = {

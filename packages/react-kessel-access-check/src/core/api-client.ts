@@ -1,9 +1,9 @@
 import type {
-  SelfAccessCheckResource,
-  SelfAccessCheckResourceWithRelation,
   SelfAccessCheckError,
   SelfAccessCheckParams,
+  CheckSelfBulkParams,
   ConsistencyToken,
+  ConsistencyOptions,
   ReporterReference,
 } from '../types';
 
@@ -47,10 +47,7 @@ export type CheckSelfBulkRequestItem = {
 
 export type CheckSelfBulkRequest = {
   items: CheckSelfBulkRequestItem[];
-  consistency?: {
-    minimizeLatency?: boolean;
-    atLeastAsFresh?: ConsistencyToken;
-  };
+  consistency?: ConsistencyOptions;
 };
 
 type CheckSelfBulkResponseItem = {
@@ -160,16 +157,7 @@ async function fetchSelfBulk(url: string, body: CheckSelfBulkRequest): Promise<C
 
 export async function checkSelfBulk(
   config: ApiConfig,
-  params: {
-    items: Array<{
-      resource: SelfAccessCheckResource | SelfAccessCheckResourceWithRelation;
-      relation: string;
-    }>;
-    consistency?: {
-      minimizeLatency?: boolean;
-      atLeastAsFresh?: ConsistencyToken;
-    };
-  }
+  params: CheckSelfBulkParams
 ): Promise<CheckSelfBulkResponse> {
   const url = `${config.baseUrl}${config.apiPath}/checkselfbulk`;
 

@@ -1,20 +1,10 @@
 import { createContext, useContext } from 'react';
-import { BulkCheckConfig } from './core/api-client';
-
-/**
- * Context value containing configuration for access checks
- * Can be extended in the future with cache, deduplication state, etc.
- */
-type AccessCheckContextValue = {
-  baseUrl: string;
-  apiPath: string;
-  bulkCheckConfig?: BulkCheckConfig
-};
+import type { ApiConfig } from './core/api-client';
 
 /**
  * Context for sharing access check configuration throughout the component tree
  */
-export const AccessCheckContext = createContext<AccessCheckContextValue | undefined>(
+export const AccessCheckContext = createContext<ApiConfig | undefined>(
   undefined
 );
 
@@ -22,7 +12,7 @@ export const AccessCheckContext = createContext<AccessCheckContextValue | undefi
  * Hook to access the AccessCheck context
  * @throws Error if used outside of AccessCheckProvider
  */
-export function useAccessCheckContext(): AccessCheckContextValue {
+export function useAccessCheckContext(): ApiConfig {
   const context = useContext(AccessCheckContext);
 
   if (context === undefined) {
