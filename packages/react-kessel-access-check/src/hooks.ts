@@ -6,6 +6,7 @@ import type {
   SelfAccessCheckParams,
   BulkSelfAccessCheckParams,
   BulkSelfAccessCheckNestedRelationsParams,
+  CheckSelfBulkParamsItem,
   SelfAccessCheckResult,
   BulkSelfAccessCheckResult,
   SelfAccessCheckResultItemWithRelation,
@@ -98,11 +99,6 @@ function useSingleAccessCheck(
   return state;
 }
 
-type BulkCheckItem = {
-  resource: SelfAccessCheckResource;
-  relation: string;
-};
-
 /**
  * Extended state for bulk checks including consistency token
  */
@@ -116,7 +112,7 @@ type BulkAccessCheckState = AccessCheckState<SelfAccessCheckResultItemWithRelati
 function buildBulkCheckItems(
   resources: readonly SelfAccessCheckResource[],
   sharedRelation: string | null
-): BulkCheckItem[] {
+): CheckSelfBulkParamsItem[] {
   return resources.map(resource => {
     // For nested relations, use the relation from the resource
     // For same relation, use the shared relation param

@@ -13,5 +13,6 @@ export type {
   SelfAccessCheckResultItemWithRelation,
   SelfAccessCheckResult,
   BulkSelfAccessCheckResult,
+  CheckSelfBulkParamsItem,
   CheckSelfBulkParams,
 } from './types';

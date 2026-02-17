@@ -60,12 +60,14 @@ export type BulkSelfAccessCheckNestedRelationsParams =
     resources: NotEmptyArray<SelfAccessCheckResourceWithRelation>;
   };
 
-// API client bulk params type
+// API client bulk params types
+export type CheckSelfBulkParamsItem = {
+  resource: SelfAccessCheckResource | SelfAccessCheckResourceWithRelation;
+  relation: string;
+};
+
 export type CheckSelfBulkParams = {
-  items: Array<{
-    resource: SelfAccessCheckResource | SelfAccessCheckResourceWithRelation;
-    relation: string;
-  }>;
+  items: Array<CheckSelfBulkParamsItem>;
   consistency?: ConsistencyOptions;
 };
 
