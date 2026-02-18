@@ -1,11 +1,28 @@
 // Utility type to ensure array has at least one element
-export type NotEmptyArray<T> = [T, ...T[]];
+type NotEmptyArray<T> = [T, ...T[]];
+
+// Consistency token type
+export type ConsistencyToken = {
+  token: string;
+};
+
+// Consistency options type
+export type ConsistencyOptions = {
+  minimizeLatency?: boolean;
+  atLeastAsFresh?: ConsistencyToken;
+};
+
+// Reporter reference type
+export type ReporterReference = {
+  type: string;
+  instanceId?: string;
+};
 
 // Resource types
 export type SelfAccessCheckResource = {
   id: string;
   type: string;
-  reporter: { type: string; instanceId?: string };
+  reporter: ReporterReference;
   [key: string]: unknown;
 };
 
@@ -26,14 +43,9 @@ export type SelfAccessCheckParams = {
   resource: SelfAccessCheckResource;
 };
 
-export type BulkSelfAccessCheckCommonParams = {
+type BulkSelfAccessCheckCommonParams = {
   options?: {
-    consistency?: {
-      minimizeLatency?: boolean;
-      atLeastAsFresh?: {
-        token: string;
-      };
-    };
+    consistency?: ConsistencyOptions;
   };
 };
 
@@ -48,6 +60,17 @@ export type BulkSelfAccessCheckNestedRelationsParams =
     resources: NotEmptyArray<SelfAccessCheckResourceWithRelation>;
   };
 
+// API client bulk params types
+export type CheckSelfBulkParamsItem = {
+  resource: SelfAccessCheckResource | SelfAccessCheckResourceWithRelation;
+  relation: string;
+};
+
+export type CheckSelfBulkParams = {
+  items: Array<CheckSelfBulkParamsItem>;
+  consistency?: ConsistencyOptions;
+};
+
 // Result types
 export type SelfAccessCheckResultItem = {
   allowed: boolean;
@@ -59,7 +82,7 @@ export type SelfAccessCheckResultItemWithRelation = SelfAccessCheckResultItem & 
   error?: SelfAccessCheckError;
 };
 
-export type SelfAccessCheckResultCommon = {
+type SelfAccessCheckResultCommon = {
   loading: boolean;
   error?: SelfAccessCheckError;
 };
@@ -70,7 +93,5 @@ export type SelfAccessCheckResult = SelfAccessCheckResultCommon & {
 
 export type BulkSelfAccessCheckResult = SelfAccessCheckResultCommon & {
   data?: SelfAccessCheckResultItemWithRelation[];
-  consistencyToken?: {
-    token: string;
-  };
+  consistencyToken?: ConsistencyToken;
 };

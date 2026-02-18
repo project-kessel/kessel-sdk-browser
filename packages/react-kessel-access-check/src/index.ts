@@ -4,19 +4,15 @@ export { useAccessCheckContext } from './AccessCheckContext';
 
 // Type exports
 export type {
-  NotEmptyArray,
+  ConsistencyToken,
+  ConsistencyOptions,
+  ReporterReference,
   SelfAccessCheckResource,
   SelfAccessCheckResourceWithRelation,
   SelfAccessCheckError,
-  SelfAccessCheckParams,
-  BulkSelfAccessCheckCommonParams,
-  BulkSelfAccessCheckParams,
-  BulkSelfAccessCheckNestedRelationsParams,
-  SelfAccessCheckResultItem,
   SelfAccessCheckResultItemWithRelation,
-  SelfAccessCheckResultCommon,
   SelfAccessCheckResult,
   BulkSelfAccessCheckResult,
+  CheckSelfBulkParamsItem,
+  CheckSelfBulkParams,
 } from './types';
-
-export type { AccessCheckContextValue } from './AccessCheckContext';

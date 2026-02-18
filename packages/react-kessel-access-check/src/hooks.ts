@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAccessCheckContext } from './AccessCheckContext';
 import { checkSelf, checkSelfBulk, ApiConfig } from './core/api-client';
-import { transformSingleResponse, transformBulkResponse, transformError } from './core/transformers';
+import { transformSingleResponse, transformBulkResponse } from './core/transformers';
 import type {
   SelfAccessCheckParams,
   BulkSelfAccessCheckParams,
   BulkSelfAccessCheckNestedRelationsParams,
+  CheckSelfBulkParamsItem,
   SelfAccessCheckResult,
   BulkSelfAccessCheckResult,
   SelfAccessCheckResultItemWithRelation,
@@ -37,9 +38,12 @@ function createInitialState<TData>(): AccessCheckState<TData> {
  * Handles errors from API calls in a consistent way
  */
 function handleApiError(err: unknown): SelfAccessCheckError {
-  return transformError(
-    err as { code: number; message: string; details?: unknown[] }
-  );
+  const error = err as { code: number; message: string; details?: unknown[] };
+  return {
+    code: error.code,
+    message: error.message,
+    details: error.details || [],
+  };
 }
 
 /**
@@ -95,11 +99,6 @@ function useSingleAccessCheck(
   return state;
 }
 
-type BulkCheckItem = {
-  resource: SelfAccessCheckResource;
-  relation: string;
-};
-
 /**
  * Extended state for bulk checks including consistency token
  */
@@ -113,7 +112,7 @@ type BulkAccessCheckState = AccessCheckState<SelfAccessCheckResultItemWithRelati
 function buildBulkCheckItems(
   resources: readonly SelfAccessCheckResource[],
   sharedRelation: string | null
-): BulkCheckItem[] {
+): CheckSelfBulkParamsItem[] {
   return resources.map(resource => {
     // For nested relations, use the relation from the resource
     // For same relation, use the shared relation param

@@ -172,7 +172,7 @@ function useSelfAccessCheck(params: {
   options?: {
     consistency?: {
       minimizeLatency?: boolean;
-      atLeastAsFresh?: { token: string };
+      atLeastAsFresh?: ConsistencyToken;
     };
   };
 }): {
@@ -184,7 +184,7 @@ function useSelfAccessCheck(params: {
   }>;
   loading: boolean;
   error?: SelfAccessCheckError;
-  consistencyToken?: { token: string };
+  consistencyToken?: ConsistencyToken;
 }
 ```
 
@@ -218,7 +218,7 @@ function useSelfAccessCheck(params: {
   options?: {
     consistency?: {
       minimizeLatency?: boolean;
-      atLeastAsFresh?: { token: string };
+      atLeastAsFresh?: ConsistencyToken;
     };
   };
 }): {
@@ -230,7 +230,7 @@ function useSelfAccessCheck(params: {
   }>;
   loading: boolean;
   error?: SelfAccessCheckError;
-  consistencyToken?: { token: string };
+  consistencyToken?: ConsistencyToken;
 }
 ```
 
@@ -495,13 +495,14 @@ import {
   AccessCheck,
   useSelfAccessCheck,
   // Types
+  ConsistencyToken,
+  ReporterReference,
   SelfAccessCheckResource,
-  SelfAccessCheckParams,
-  BulkSelfAccessCheckParams,
-  BulkSelfAccessCheckNestedRelationsParams,
+  SelfAccessCheckResourceWithRelation,
+  SelfAccessCheckError,
   SelfAccessCheckResult,
   BulkSelfAccessCheckResult,
-  SelfAccessCheckError
+  SelfAccessCheckResultItemWithRelation
 } from '@project-kessel/react-kessel-access-check';
 
 // Resource type
@@ -539,17 +540,14 @@ const nestedCheck: BulkSelfAccessCheckResult = useSelfAccessCheck({
 
 ### Available Types
 
-- `NotEmptyArray<T>` - Array with at least one element
-- `SelfAccessCheckResource` - Resource object with id and type
-- `SelfAccessCheckResourceWithRelation` - Resource with embedded relation
+- `ConsistencyToken` - Consistency token structure (`{ token: string }`)
+- `ReporterReference` - Reporter reference structure (`{ type: string; instanceId?: string }`)
+- `SelfAccessCheckResource` - Resource object with id, type, and reporter
+- `SelfAccessCheckResourceWithRelation` - Resource with embedded relation (for nested checks)
 - `SelfAccessCheckError` - Error object structure
-- `SelfAccessCheckParams` - Parameters for single resource check
-- `BulkSelfAccessCheckParams` - Parameters for bulk same-relation check
-- `BulkSelfAccessCheckNestedRelationsParams` - Parameters for bulk nested-relations check
-- `SelfAccessCheckResultItem` - Result item for single check
-- `SelfAccessCheckResultItemWithRelation` - Result item for bulk checks
-- `SelfAccessCheckResult` - Return type for single check
-- `BulkSelfAccessCheckResult` - Return type for bulk checks
+- `SelfAccessCheckResultItemWithRelation` - Individual result item in bulk check responses
+- `SelfAccessCheckResult` - Return type for single resource checks
+- `BulkSelfAccessCheckResult` - Return type for bulk resource checks
 
 ## Architecture
 
