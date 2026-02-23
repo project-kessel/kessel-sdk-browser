@@ -304,24 +304,7 @@ type WorkspaceAuthRequest = {
 type HttpClient = typeof fetch;
 ```
 
-**Example — fetch a workspace ID, then use it in an access check**
-```typescript
-import { fetchDefaultWorkspace } from '@project-kessel/react-kessel-access-check';
-
-const workspace = await fetchDefaultWorkspace('https://console.redhat.com', {
-  headers: { 'Authorization': `Bearer ${token}` },
-});
-// Use workspace.id as the resource ID in an access check
-```
-
-**Example — with custom fetch client**
-```typescript
-const workspace = await fetchDefaultWorkspace(
-  'https://console.redhat.com',
-  { headers: { 'Authorization': `Bearer ${token}` } },
-  myCustomFetchWithInterceptors,
-);
-```
+See [Fetching Workspace IDs for Access Checks](#fetching-workspace-ids-for-access-checks) for full usage examples.
 
 ## Usage Examples
 
@@ -426,34 +409,36 @@ function WorkspacePermissions({ workspaceId }) {
 
 ### Fetching Workspace IDs for Access Checks
 
-When the resource you're checking access for is a workspace, you may need its UUID from RBAC first. Use `fetchDefaultWorkspace` or `fetchRootWorkspace` to get it, then pass the ID into your access check:
+When the resource you're checking access for is a workspace, you may need its UUID from RBAC first. Use `fetchDefaultWorkspace` or `fetchRootWorkspace` to retrieve it, then pass the ID into your access check resource:
 
-```jsx
-import { useState, useEffect } from 'react';
-import {
-  fetchDefaultWorkspace,
-  useSelfAccessCheck
-} from '@project-kessel/react-kessel-access-check';
+```typescript
+import { fetchDefaultWorkspace, fetchRootWorkspace } from '@project-kessel/react-kessel-access-check';
 
-function WorkspaceAccessCheck({ token }) {
-  const [workspaceId, setWorkspaceId] = useState();
+// Fetch the default workspace ID for the current org
+const workspace = await fetchDefaultWorkspace('https://console.redhat.com', {
+  headers: { 'Authorization': `Bearer ${token}` },
+});
 
-  useEffect(() => {
-    fetchDefaultWorkspace('https://console.redhat.com', {
-      headers: { 'Authorization': `Bearer ${token}` },
-    }).then(ws => setWorkspaceId(ws.id));
-  }, [token]);
+// Use workspace.id as the resource ID in access checks
+const resource = {
+  id: workspace.id,
+  type: 'workspace',
+  reporter: { type: 'rbac' },
+};
 
-  const { data, loading } = useSelfAccessCheck({
-    relation: 'view',
-    resource: { id: workspaceId ?? '', type: 'workspace' }
-  });
+// Or fetch the root workspace
+const rootWorkspace = await fetchRootWorkspace('https://console.redhat.com', {
+  headers: { 'Authorization': `Bearer ${token}` },
+});
+```
 
-  if (!workspaceId || loading) return <Spinner />;
-  if (!data?.allowed) return <div>Access denied</div>;
-
-  return <div>You have access to the default workspace.</div>;
-}
+**With a custom fetch client:**
+```typescript
+const workspace = await fetchDefaultWorkspace(
+  'https://console.redhat.com',
+  { headers: { 'Authorization': `Bearer ${token}` } },
+  myCustomFetchWithInterceptors,
+);
 ```
 
 ### Conditional Rendering

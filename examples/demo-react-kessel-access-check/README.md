@@ -156,17 +156,19 @@ const { data } = useSelfAccessCheck({
 ### Fetching Workspace IDs for Access Checks
 
 ```tsx
-import { fetchDefaultWorkspace, useSelfAccessCheck } from '@project-kessel/react-kessel-access-check';
+import { fetchDefaultWorkspace } from '@project-kessel/react-kessel-access-check';
 
-// Get the default workspace UUID from RBAC, then use it in an access check
+// Fetch the default workspace UUID from RBAC, then use it as a resource ID in access checks
 const workspace = await fetchDefaultWorkspace('https://console.redhat.com', {
   headers: { 'Authorization': `Bearer ${token}` },
 });
 
-const { data } = useSelfAccessCheck({
-  relation: 'view',
-  resource: { id: workspace.id, type: 'workspace' }
-});
+// Use workspace.id as the resource ID in access checks
+const resource = {
+  id: workspace.id,
+  type: 'workspace',
+  reporter: { type: 'rbac' },
+};
 ```
 
 ## Development
