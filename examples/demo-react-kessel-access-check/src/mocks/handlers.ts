@@ -95,5 +95,49 @@ export const handlers = [
       pairs,
       consistencyToken: { token }
     });
-  })
+  }),
+
+  // Workspace list endpoint (RBAC v2)
+  http.get('http://localhost:3000/api/rbac/v2/workspaces/', async ({ request }) => {
+    await delay(600);
+
+    const url = new URL(request.url);
+    const type = url.searchParams.get('type');
+
+    if (type === 'root') {
+      return HttpResponse.json({
+        meta: { count: 1, limit: 10, offset: 0 },
+        links: { first: null, next: null, previous: null, last: null },
+        data: [{
+          id: 'e4277742-b91c-43f1-a185-b827e8574345',
+          type: 'root',
+          name: 'Root Workspace',
+          description: 'Organization root workspace',
+          created: '2024-08-04T12:00:00Z',
+          modified: '2024-08-04T12:00:00Z',
+        }],
+      });
+    }
+
+    if (type === 'default') {
+      return HttpResponse.json({
+        meta: { count: 1, limit: 10, offset: 0 },
+        links: { first: null, next: null, previous: null, last: null },
+        data: [{
+          id: 'a1b2c3d4-5678-9abc-def0-1234567890ab',
+          type: 'default',
+          name: 'Default Workspace',
+          description: 'Organization default workspace',
+          parent_id: 'e4277742-b91c-43f1-a185-b827e8574345',
+          created: '2024-08-04T12:00:00Z',
+          modified: '2024-08-04T12:00:00Z',
+        }],
+      });
+    }
+
+    return HttpResponse.json(
+      { code: 400, message: `Invalid workspace type: ${type}`, details: [] },
+      { status: 400 }
+    );
+  }),
 ];

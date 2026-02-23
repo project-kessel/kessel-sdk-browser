@@ -5,6 +5,7 @@ import Navigation from './components/Navigation';
 import SingleResourceCheck from './components/demos/SingleResourceCheck';
 import BulkSameRelation from './components/demos/BulkSameRelation';
 import BulkNestedRelations from './components/demos/BulkNestedRelations';
+import WorkspaceRetrieval from './components/demos/WorkspaceRetrieval';
 import './App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
           {activeDemo === 'single' && <SingleResourceCheck />}
           {activeDemo === 'bulk-same' && <BulkSameRelation />}
           {activeDemo === 'bulk-nested' && <BulkNestedRelations />}
+          {activeDemo === 'workspace' && <WorkspaceRetrieval />}
         </main>
       </Layout>
     </AccessCheck.Provider>
