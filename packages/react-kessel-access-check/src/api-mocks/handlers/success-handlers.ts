@@ -10,7 +10,7 @@ export const successHandlers = {
   /**
    * Single check - returns ALLOWED_TRUE
    */
-  singleCheckAllowed: http.post('/api/kessel/v1beta2/checkself', () => {
+  singleCheckAllowed: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json({
       allowed: 'ALLOWED_TRUE',
       consistencyToken: { token: 'mock-token-' + crypto.randomUUID() }
@@ -20,7 +20,7 @@ export const successHandlers = {
   /**
    * Single check - returns ALLOWED_FALSE
    */
-  singleCheckDenied: http.post('/api/kessel/v1beta2/checkself', () => {
+  singleCheckDenied: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json({
       allowed: 'ALLOWED_FALSE',
       consistencyToken: { token: 'mock-token-' + crypto.randomUUID() }
@@ -30,7 +30,7 @@ export const successHandlers = {
   /**
    * Bulk check - all allowed
    */
-  bulkCheckAllAllowed: http.post('/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
+  bulkCheckAllAllowed: http.post('*/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
     const body = await request.json() as CheckSelfBulkRequest;
 
     return HttpResponse.json({
@@ -45,7 +45,7 @@ export const successHandlers = {
   /**
    * Bulk check - mixed permissions (for testing)
    */
-  bulkCheckMixed: http.post('/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
+  bulkCheckMixed: http.post('*/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
     const body = await request.json() as CheckSelfBulkRequest;
 
     return HttpResponse.json({
@@ -64,7 +64,7 @@ export const successHandlers = {
   /**
    * Bulk check - empty array (should return empty pairs)
    */
-  bulkCheckEmpty: http.post('/api/kessel/v1beta2/checkselfbulk', async () => {
+  bulkCheckEmpty: http.post('*/api/kessel/v1beta2/checkselfbulk', async () => {
     return HttpResponse.json({
       pairs: [],
       consistencyToken: { token: 'mock-token-' + crypto.randomUUID() }

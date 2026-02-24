@@ -9,7 +9,7 @@ export const errorHandlers = {
   /**
    * 400 Bad Request - Missing required fields
    */
-  badRequest: http.post('/api/kessel/v1beta2/checkself', () => {
+  badRequest: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json(
       {
         code: 400,
@@ -23,7 +23,7 @@ export const errorHandlers = {
   /**
    * 400 Bad Request - Invalid reporter field
    */
-  badRequestInvalidReporter: http.post('/api/kessel/v1beta2/checkself', () => {
+  badRequestInvalidReporter: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json(
       {
         code: 400,
@@ -37,7 +37,7 @@ export const errorHandlers = {
   /**
    * 401 Unauthorized - JWT expired or missing
    */
-  unauthorized: http.post('/api/kessel/v1beta2/checkself', () => {
+  unauthorized: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json(
       {
         code: 401,
@@ -51,7 +51,7 @@ export const errorHandlers = {
   /**
    * 401 Unauthorized - For bulk endpoint
    */
-  unauthorizedBulk: http.post('/api/kessel/v1beta2/checkselfbulk', () => {
+  unauthorizedBulk: http.post('*/api/kessel/v1beta2/checkselfbulk', () => {
     return HttpResponse.json(
       {
         code: 401,
@@ -65,7 +65,7 @@ export const errorHandlers = {
   /**
    * 403 Forbidden - User authenticated but lacks permission
    */
-  forbidden: http.post('/api/kessel/v1beta2/checkself', () => {
+  forbidden: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json(
       {
         code: 403,
@@ -79,7 +79,7 @@ export const errorHandlers = {
   /**
    * 403 Forbidden - For bulk endpoint
    */
-  forbiddenBulk: http.post('/api/kessel/v1beta2/checkselfbulk', () => {
+  forbiddenBulk: http.post('*/api/kessel/v1beta2/checkselfbulk', () => {
     return HttpResponse.json(
       {
         code: 403,
@@ -93,7 +93,7 @@ export const errorHandlers = {
   /**
    * 404 Not Found - Resource doesn't exist
    */
-  notFound: http.post('/api/kessel/v1beta2/checkself', () => {
+  notFound: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json(
       {
         code: 404,
@@ -107,7 +107,7 @@ export const errorHandlers = {
   /**
    * 429 Rate Limit Exceeded
    */
-  rateLimited: http.post('/api/kessel/v1beta2/checkself', () => {
+  rateLimited: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json(
       {
         code: 429,
@@ -126,7 +126,7 @@ export const errorHandlers = {
   /**
    * 500 Internal Server Error
    */
-  internalServerError: http.post('/api/kessel/v1beta2/checkself', () => {
+  internalServerError: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json(
       {
         code: 500,
@@ -140,7 +140,7 @@ export const errorHandlers = {
   /**
    * 500 Internal Server Error - For bulk endpoint
    */
-  internalServerErrorBulk: http.post('/api/kessel/v1beta2/checkselfbulk', () => {
+  internalServerErrorBulk: http.post('*/api/kessel/v1beta2/checkselfbulk', () => {
     return HttpResponse.json(
       {
         code: 500,
@@ -154,7 +154,7 @@ export const errorHandlers = {
   /**
    * 503 Service Unavailable - Maintenance mode
    */
-  serviceUnavailable: http.post('/api/kessel/v1beta2/checkself', () => {
+  serviceUnavailable: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.json(
       {
         code: 503,
@@ -168,7 +168,7 @@ export const errorHandlers = {
   /**
    * Network timeout - Never resolves
    */
-  timeout: http.post('/api/kessel/v1beta2/checkself', async () => {
+  timeout: http.post('*/api/kessel/v1beta2/checkself', async () => {
     await delay('infinite');
     return HttpResponse.json({ allowed: 'ALLOWED_TRUE' });
   }),
@@ -176,7 +176,7 @@ export const errorHandlers = {
   /**
    * Invalid JSON response - Returns HTML error page
    */
-  invalidJson: http.post('/api/kessel/v1beta2/checkself', () => {
+  invalidJson: http.post('*/api/kessel/v1beta2/checkself', () => {
     return new Response('<html><body>Error</body></html>', {
       status: 500,
       headers: { 'Content-Type': 'text/html' },
@@ -186,7 +186,7 @@ export const errorHandlers = {
   /**
    * Invalid JSON response - For bulk endpoint
    */
-  invalidJsonBulk: http.post('/api/kessel/v1beta2/checkselfbulk', () => {
+  invalidJsonBulk: http.post('*/api/kessel/v1beta2/checkselfbulk', () => {
     return new Response('<html><body>Error</body></html>', {
       status: 500,
       headers: { 'Content-Type': 'text/html' },
@@ -196,7 +196,7 @@ export const errorHandlers = {
   /**
    * Malformed JSON - Invalid JSON syntax
    */
-  malformedJson: http.post('/api/kessel/v1beta2/checkself', () => {
+  malformedJson: http.post('*/api/kessel/v1beta2/checkself', () => {
     return new Response('{invalid json}', {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -206,14 +206,14 @@ export const errorHandlers = {
   /**
    * Network error - Simulates network failure
    */
-  networkError: http.post('/api/kessel/v1beta2/checkself', () => {
+  networkError: http.post('*/api/kessel/v1beta2/checkself', () => {
     return HttpResponse.error();
   }),
 
   /**
    * Network error - For bulk endpoint
    */
-  networkErrorBulk: http.post('/api/kessel/v1beta2/checkselfbulk', () => {
+  networkErrorBulk: http.post('*/api/kessel/v1beta2/checkselfbulk', () => {
     return HttpResponse.error();
   }),
 };

@@ -23,7 +23,7 @@ export function createTestWrapper(config?: {
 }) {
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <AccessCheck.Provider
-      baseUrl={config?.baseUrl ?? ''}
+      baseUrl={config?.baseUrl ?? 'https://test.example.com'}
       apiPath={config?.apiPath ?? '/api/kessel/v1beta2'}
       bulkCheckConfig={config?.bulkCheckConfig}
     >

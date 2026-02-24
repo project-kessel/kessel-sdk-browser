@@ -8,7 +8,7 @@ import type { CheckSelfBulkRequest } from '../core/api-client';
 
 export const handlers = [
   // Single check endpoint - returns allowed by default
-  http.post('/api/kessel/v1beta2/checkself', async () => {
+  http.post('*/api/kessel/v1beta2/checkself', async () => {
     return HttpResponse.json({
       allowed: 'ALLOWED_TRUE',
       consistencyToken: {
@@ -18,7 +18,7 @@ export const handlers = [
   }),
 
   // Bulk check endpoint - returns mixed permissions
-  http.post('/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
+  http.post('*/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
     const body = await request.json() as CheckSelfBulkRequest;
     const items = body.items;
 

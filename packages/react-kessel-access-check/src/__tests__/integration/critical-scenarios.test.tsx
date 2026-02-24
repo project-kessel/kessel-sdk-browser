@@ -401,7 +401,7 @@ describe('Integration Tests - Critical Scenarios', () => {
       // Second: Test allowed=false (successful API call, but permission denied)
       server.resetHandlers();
       server.use(
-        http.post('/api/kessel/v1beta2/checkself', () => {
+        http.post('*/api/kessel/v1beta2/checkself', () => {
           return HttpResponse.json({
             allowed: 'ALLOWED_FALSE',
             consistencyToken: { token: 'mock-token' }
@@ -630,7 +630,7 @@ describe('Integration Tests - Critical Scenarios', () => {
      */
     it('should safely handle XSS payloads in bulk check', async () => {
       server.use(
-        http.post('/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
+        http.post('*/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
           const body = await request.json() as any;
 
           // Verify payloads were sent as-is
