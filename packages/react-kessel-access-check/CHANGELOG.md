@@ -1,3 +1,12 @@
+## 0.4.0 (2026-02-24)
+
+### 🚀 Features
+
+- clean up workspace retrieval demo build errors and add newline back to types.ts ([aff7639](https://github.com/project-kessel/kessel-sdk-browser/commit/aff7639))
+- update docs to reflect simplified examples for workspace retrieval ([e9c030a](https://github.com/project-kessel/kessel-sdk-browser/commit/e9c030a))
+- update error type refs from rebase ([5b938ea](https://github.com/project-kessel/kessel-sdk-browser/commit/5b938ea))
+- add RBAC workspace id helpers for access checks ([687eb8e](https://github.com/project-kessel/kessel-sdk-browser/commit/687eb8e))
+
 ## 0.3.2 (2026-02-18)
 
 ### 🩹 Fixes
