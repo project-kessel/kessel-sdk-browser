@@ -8,7 +8,7 @@ This monorepo contains one package:
 
 ### [@project-kessel/react-kessel-access-check](./packages/react-kessel-access-check)
 
-A React SDK for performing granular and bulk access checks against the Kessel access check service in browser environments.
+A React SDK for performing granular and bulk access checks against the Kessel access check service in browser environments. Includes helpers for retrieving workspace IDs from RBAC for use in access checks.
 
 **Use for**: Frontend applications needing permission checks for UI rendering and user interactions.
 
@@ -38,7 +38,7 @@ function App() {
   );
 }
 
-// 2. Use the hook in your components
+// 2. Use the hook in your components for access checks
 function WorkspaceView({ workspaceId }) {
   const { data, loading } = useSelfAccessCheck({
     relation: 'view',
@@ -54,6 +54,14 @@ function WorkspaceView({ workspaceId }) {
 
   return <div>Workspace Content...</div>;
 }
+
+// 3. When the resource is a workspace and you need its ID from RBAC:
+import { fetchDefaultWorkspace } from '@project-kessel/react-kessel-access-check';
+
+const workspace = await fetchDefaultWorkspace('https://console.redhat.com', {
+  headers: { 'Authorization': `Bearer ${token}` },
+});
+// Use workspace.id as the resource ID in access checks
 ```
 
 See [packages/react-kessel-access-check](./packages/react-kessel-access-check) for complete documentation.
@@ -64,6 +72,7 @@ For comprehensive documentation, see:
 
 - **[@project-kessel/react-kessel-access-check](./packages/react-kessel-access-check)** - React SDK for browser-based access checks
   - Single and bulk permission checks
+  - Workspace ID helpers for RBAC (root and default)
   - React Context integration
   - TypeScript support with function overloads
   - HCC (Hybrid Cloud Console) integration
@@ -157,9 +166,12 @@ kessel-sdk-browser/
 │   └── react-kessel-access-check/
 │       ├── src/
 │       │   ├── core/                  # Core utilities
+│       │   │   ├── api-client.ts      # Access check API functions
+│       │   │   ├── workspace-client.ts # RBAC workspace ID helpers
+│       │   │   └── transformers.ts    # Response transformers
 │       │   ├── AccessCheckContext.tsx
 │       │   ├── AccessCheckProvider.tsx
-│       │   ├── hooks.ts
+│       │   ├── hooks.ts               # Access check hooks
 │       │   ├── types.ts
 │       │   └── index.ts
 │       ├── package.json
@@ -258,6 +270,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 - [Kessel Relations API](https://github.com/project-kessel/relations-api) - OpenAPI specification for Kessel
 - [Kessel Inventory API](https://github.com/project-kessel/inventory-api) - Backend service implementation
+- [RBAC v2 OpenAPI Spec](https://github.com/RedHatInsights/insights-rbac/blob/master/docs/source/specs/v2/openapi.yaml) - RBAC v2 workspace API specification
 - [Project Kessel](https://github.com/project-kessel) - Main project repository
 - [JIRA Epic: RHCLOUD-42267](https://issues.redhat.com/browse/RHCLOUD-42267) - Access Checks SDK Epic
 - [JIRA Epic: RHCLOUD-42186](https://issues.redhat.com/browse/RHCLOUD-42186) - Kessel Bulk Access Check API Epic

@@ -6,7 +6,8 @@ interface NavigationProps {
 const demos = [
   { id: 'single', label: '1. Single Resource Check' },
   { id: 'bulk-same', label: '2. Bulk Same Relation' },
-  { id: 'bulk-nested', label: '3. Bulk Nested Relations' }
+  { id: 'bulk-nested', label: '3. Bulk Nested Relations' },
+  { id: 'workspace', label: '4. Workspace Retrieval' },
 ];
 
 export default function Navigation({ activeDemo, onSelectDemo }: NavigationProps) {
