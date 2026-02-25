@@ -66,13 +66,11 @@
   "release": {
     "projects": ["packages/*"],
     "projectsRelationship": "independent",
-    "git": {
-      "commit": true,
-      "tag": true,
-      "commitMessage": "chore(release): publish {projectName}@{version}"
-    },
     "version": {
-      "conventionalCommits": true,
+      "git": {
+        "commit": false,
+        "tag": false
+      },
       "currentVersionResolver": "registry",
       "currentVersionResolverMetadata": {
         "tag": "latest"
@@ -85,7 +83,10 @@
       "manifestRootsToUpdate": [
         "{projectRoot}",
         "dist/packages/{projectName}"
-      ]
+      ],
+      "generatorOptions": {
+        "specifierSource": "conventional-commits"
+      }
     },
     "changelog": {
       "workspaceChangelog": false,
