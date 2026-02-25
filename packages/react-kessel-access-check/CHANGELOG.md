@@ -1,3 +1,9 @@
+## 0.4.1 (2026-02-25)
+
+### 🚀 Features
+
+- **rhcloud-44942:** add consistency token to the singular self access check ([#42](https://github.com/project-kessel/kessel-sdk-browser/pull/42))
+
 ## 0.4.0 (2026-02-24)
 
 ### 🚀 Features
