@@ -55,6 +55,13 @@ export default [
     },
   },
   {
+    // Test files - allow 'any' for testing edge cases
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
     // Ignore patterns
     ignores: [
       'dist/**',

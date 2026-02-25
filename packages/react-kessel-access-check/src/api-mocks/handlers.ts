@@ -1,24 +1,41 @@
 import { http, HttpResponse } from 'msw';
-import { CheckSelfBulkRequest } from '../core/api-client';
+import type { CheckSelfBulkRequest } from '../core/api-client';
 
-  const parseRequestBody = async <T>(request: Request): Promise<T> => {
-    return await request.json() as T;
-  };
+/**
+ * Default MSW handlers for testing
+ * These provide realistic default responses for both single and bulk check endpoints
+ */
 
 export const handlers = [
-  http.post('/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
-    const body = await parseRequestBody<CheckSelfBulkRequest>(request);
+  // Single check endpoint - returns allowed by default
+  http.post('*/api/kessel/v1beta2/checkself', async () => {
+    return HttpResponse.json({
+      allowed: 'ALLOWED_TRUE',
+      consistencyToken: {
+        token: 'mock-consistency-token-' + crypto.randomUUID()
+      }
+    });
+  }),
+
+  // Bulk check endpoint - returns mixed permissions
+  http.post('*/api/kessel/v1beta2/checkselfbulk', async ({ request }) => {
+    const body = await request.json() as CheckSelfBulkRequest;
     const items = body.items;
 
-    if(!items){
-      return HttpResponse.json({
-        error: 'Invalid request: items field is required'
-      }, { status: 400 });
+    if (!items) {
+      return HttpResponse.json(
+        {
+          code: 400,
+          message: 'Invalid request: items field is required',
+          details: []
+        },
+        { status: 400 }
+      );
     }
 
     // Sample response with mixed permissions
     return HttpResponse.json({
-      pairs: items.map((requestItem: any, index: number) => ({
+      pairs: items.map((requestItem, index: number) => ({
         request: requestItem,
         item: {
           allowed: index % 3 === 0 ? 'ALLOWED_TRUE' :

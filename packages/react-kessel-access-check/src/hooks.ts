@@ -176,8 +176,19 @@ function useBulkAccessCheck(
   const consistencyKey = useConsistencyKey(options ?? null);
 
   useEffect(() => {
-    // Skip if not enabled or missing required params
-    if (!enabled || !resources || resources.length === 0) {
+    // Skip if not enabled
+    if (!enabled) {
+      return;
+    }
+
+    // Handle empty resources array - complete immediately with empty result
+    if (!resources || resources.length === 0) {
+      setState({
+        data: [],
+        loading: false,
+        error: undefined,
+        consistencyToken: undefined,
+      });
       return;
     }
 
