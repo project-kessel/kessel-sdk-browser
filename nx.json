@@ -73,6 +73,10 @@
     },
     "version": {
       "conventionalCommits": true,
+      "currentVersionResolver": "registry",
+      "currentVersionResolverMetadata": {
+        "tag": "latest"
+      },
       "preVersionCommand": "npx nx run-many -t build",
       "preserveLocalDependencyProtocols": false,
       "versionActionsOptions": {
