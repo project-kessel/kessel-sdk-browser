@@ -32,8 +32,11 @@ jobs:
       - name: Run linter
         run: npx nx run-many -t lint
 
-      - name: Run tests with coverage
-        run: npx nx run-many -t test --coverage
+      - name: Run unit tests with coverage
+        run: npm run test:unit:coverage
+
+      - name: Run integration tests with coverage
+        run: npm run test:integration:coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
