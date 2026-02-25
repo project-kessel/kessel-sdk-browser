@@ -26,6 +26,7 @@ type CheckSelfRequest = {
     reporter: ReporterReference;
   };
   relation: string;
+  consistency?: ConsistencyOptions;
 };
 
 export type AllowedEnum = 'ALLOWED_TRUE' | 'ALLOWED_FALSE' | 'ALLOWED_UNSPECIFIED';
@@ -81,6 +82,7 @@ export async function checkSelf(
       reporter: params.resource.reporter,
     },
     relation: params.relation,
+    ...(params.options?.consistency && { consistency: params.options.consistency }),
   };
 
   const response = await fetch(url, {

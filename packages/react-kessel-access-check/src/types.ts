@@ -41,6 +41,9 @@ export type SelfAccessCheckError = {
 export type SelfAccessCheckParams = {
   relation: string;
   resource: SelfAccessCheckResource;
+  options?: {
+    consistency?: ConsistencyOptions;
+  };
 };
 
 type BulkSelfAccessCheckCommonParams = {
@@ -89,6 +92,7 @@ type SelfAccessCheckResultCommon = {
 
 export type SelfAccessCheckResult = SelfAccessCheckResultCommon & {
   data?: SelfAccessCheckResultItem;
+  consistencyToken?: ConsistencyToken;
 };
 
 export type BulkSelfAccessCheckResult = SelfAccessCheckResultCommon & {
