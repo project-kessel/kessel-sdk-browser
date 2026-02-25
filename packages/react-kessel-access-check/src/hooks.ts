@@ -7,6 +7,7 @@ import type {
   BulkSelfAccessCheckParams,
   BulkSelfAccessCheckNestedRelationsParams,
   CheckSelfBulkParamsItem,
+  ConsistencyToken,
   SelfAccessCheckResult,
   BulkSelfAccessCheckResult,
   SelfAccessCheckResultItemWithRelation,
@@ -47,6 +48,13 @@ function handleApiError(err: unknown): SelfAccessCheckError {
 }
 
 /**
+ * Extended state for single checks including consistency token
+ */
+type SingleAccessCheckState = AccessCheckState<SelfAccessCheckResult['data']> & {
+  consistencyToken: ConsistencyToken | undefined;
+};
+
+/**
  * Internal hook for single resource access checks.
  * Only performs the check when enabled is true.
  */
@@ -54,11 +62,15 @@ function useSingleAccessCheck(
   config: ApiConfig,
   resource: SelfAccessCheckResource | null,
   relation: string | null,
+  options: SelfAccessCheckParams['options'] | undefined,
   enabled: boolean
 ): SelfAccessCheckResult {
-  const [state, setState] = useState<AccessCheckState<SelfAccessCheckResult['data']>>(
-    createInitialState
-  );
+  const [state, setState] = useState<SingleAccessCheckState>({
+    ...createInitialState<SelfAccessCheckResult['data']>(),
+    consistencyToken: undefined,
+  });
+
+  const consistencyKey = useConsistencyKey(options ?? null);
 
   useEffect(() => {
     // Skip if not enabled or missing required params
@@ -71,18 +83,23 @@ function useSingleAccessCheck(
     let isMounted = true;
 
     const performCheck = async () => {
-      setState({ data: undefined, loading: true, error: undefined });
+      setState({ data: undefined, loading: true, error: undefined, consistencyToken: undefined });
 
       try {
-        const response = await checkSelf(config, { resource, relation });
+        const response = await checkSelf(config, { resource, relation, options });
 
         if (isMounted) {
           const transformedData = transformSingleResponse(response, resource);
-          setState({ data: transformedData, loading: false, error: undefined });
+          setState({
+            data: transformedData,
+            loading: false,
+            error: undefined,
+            consistencyToken: response.consistencyToken,
+          });
         }
       } catch (err) {
         if (isMounted) {
-          setState({ data: undefined, loading: false, error: handleApiError(err) });
+          setState({ data: undefined, loading: false, error: handleApiError(err), consistencyToken: undefined });
         }
       }
     };
@@ -94,7 +111,7 @@ function useSingleAccessCheck(
       abortController.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, enabled, resource?.id, resource?.type, resource?.reporter, relation]);
+  }, [config, enabled, resource?.id, resource?.type, resource?.reporter, relation, consistencyKey]);
 
   return state;
 }
@@ -285,6 +302,7 @@ export function useSelfAccessCheck(
     config,
     singleParams?.resource ?? null,
     singleParams?.relation ?? null,
+    singleParams?.options,
     isSingleCheck
   );
 

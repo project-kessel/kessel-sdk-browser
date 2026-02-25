@@ -247,6 +247,120 @@ describe('useSelfAccessCheck', () => {
       });
     });
 
+    it('should return consistency token from API response', async () => {
+      const resource = { id: 'test-id', type: 'workspace', reporter: { type: 'rbac' } };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          allowed: 'ALLOWED_TRUE',
+          consistencyToken: { token: 'single-check-token' },
+        }),
+      } as Response);
+
+      const { result } = renderHook(
+        () =>
+          useSelfAccessCheck({
+            relation: 'view',
+            resource,
+          }),
+        { wrapper }
+      );
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(result.current.data?.allowed).toBe(true);
+      expect(result.current.consistencyToken).toEqual({ token: 'single-check-token' });
+    });
+
+    it('should pass consistency options to single check API', async () => {
+      const resource = { id: 'test-id', type: 'workspace', reporter: { type: 'rbac' } };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          allowed: 'ALLOWED_TRUE',
+          consistencyToken: { token: 'fresh-single-token' },
+        }),
+      } as Response);
+
+      const { result } = renderHook(
+        () =>
+          useSelfAccessCheck({
+            relation: 'edit',
+            resource,
+            options: {
+              consistency: {
+                minimizeLatency: true,
+                atLeastAsFresh: { token: 'previous-token' },
+              },
+            },
+          }),
+        { wrapper }
+      );
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/api/kessel/v1beta2/checkself',
+        expect.objectContaining({
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            object: {
+              resourceId: 'test-id',
+              resourceType: 'workspace',
+              reporter: { type: 'rbac' },
+            },
+            relation: 'edit',
+            consistency: {
+              minimizeLatency: true,
+              atLeastAsFresh: { token: 'previous-token' },
+            },
+          }),
+        })
+      );
+
+      expect(result.current.consistencyToken).toEqual({ token: 'fresh-single-token' });
+    });
+
+    it('should not include consistency in request body when not provided', async () => {
+      const resource = { id: 'test-id', type: 'workspace', reporter: { type: 'rbac' } };
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ allowed: 'ALLOWED_TRUE' }),
+      } as Response);
+
+      const { result } = renderHook(
+        () =>
+          useSelfAccessCheck({
+            relation: 'view',
+            resource,
+          }),
+        { wrapper }
+      );
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://api.example.com/api/kessel/v1beta2/checkself',
+        expect.objectContaining({
+          body: JSON.stringify({
+            object: {
+              resourceId: 'test-id',
+              resourceType: 'workspace',
+              reporter: { type: 'rbac' },
+            },
+            relation: 'view',
+          }),
+        })
+      );
+    });
+
     it('should throw error when used outside provider', () => {
       const resource = { id: 'test-id', type: 'workspace', reporter: { type: 'rbac' } };
 
