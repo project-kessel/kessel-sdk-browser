@@ -126,34 +126,6 @@ export function isApiError(
 }
 
 /**
- * Creates a resource with invalid reporter configuration
- * Used for testing reporter field validation
- *
- * @example
- * const resource = createInvalidReporterResource('missing');
- * const resource = createInvalidReporterResource('null');
- * const resource = createInvalidReporterResource('malformed');
- */
-export function createInvalidReporterResource(
-  variant: 'missing' | 'null' | 'malformed'
-): any {
-  const base = {
-    id: 'test-id',
-    type: 'workspace',
-  };
-
-  if (variant === 'null') {
-    return { ...base, reporter: null };
-  } else if (variant === 'malformed') {
-    return createMockResource({
-      reporter: { instanceId: 'test-app' } as any,
-    });
-  }
-  // 'missing' - no reporter field at all
-  return base;
-}
-
-/**
  * Validates that an error object has the expected structure
  * Used for consistent error shape testing
  *

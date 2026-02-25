@@ -35,8 +35,23 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test:unit:coverage
 
-      - name: Run integration tests with coverage
-        run: npm run test:integration:coverage
+      - name: Run integration tests - Empty Array Handling
+        run: jest --config=packages/react-kessel-access-check/jest.config.integration.js empty-array-handling.test.tsx --coverage
+
+      - name: Run integration tests - Reporter Validation
+        run: jest --config=packages/react-kessel-access-check/jest.config.integration.js reporter-validation.test.tsx --coverage
+
+      - name: Run integration tests - Component Lifecycle
+        run: jest --config=packages/react-kessel-access-check/jest.config.integration.js component-lifecycle.test.tsx --coverage
+
+      - name: Run integration tests - HTTP Errors
+        run: jest --config=packages/react-kessel-access-check/jest.config.integration.js http-errors.test.tsx --coverage
+
+      - name: Run integration tests - Response Parsing
+        run: jest --config=packages/react-kessel-access-check/jest.config.integration.js response-parsing.test.tsx --coverage
+
+      - name: Run integration tests - Security XSS
+        run: jest --config=packages/react-kessel-access-check/jest.config.integration.js security-xss.test.tsx --coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

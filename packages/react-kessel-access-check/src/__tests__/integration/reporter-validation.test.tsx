@@ -9,20 +9,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useSelfAccessCheck } from '../../hooks';
 import { server } from '../../api-mocks/msw-server';
 import { errorHandlers } from '../../api-mocks/handlers/error-handlers';
-import {
-  createTestWrapper,
-  createInvalidReporterResource,
-} from '../../api-mocks/test-utils';
+import { createTestWrapper, createMockResource } from '../../api-mocks/test-utils';
 
 describe('Integration Tests - Reporter Field Validation', () => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
-  afterEach(() => {
-    server.resetHandlers();
-    // Force garbage collection if available
-    if (global.gc) {
-      global.gc();
-    }
-  });
+  afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
   /**
@@ -36,10 +27,16 @@ describe('Integration Tests - Reporter Field Validation', () => {
   it('should handle missing reporter field with clear error', async () => {
     server.use(errorHandlers.badRequestInvalidReporter);
 
+    const resourceWithoutReporter = {
+      id: 'test-id',
+      type: 'workspace',
+      // reporter field intentionally missing
+    } as any;
+
     const { result } = renderHook(
       () => useSelfAccessCheck({
         relation: 'view',
-        resource: createInvalidReporterResource('missing')
+        resource: resourceWithoutReporter
       }),
       { wrapper: createTestWrapper() }
     );
@@ -58,10 +55,14 @@ describe('Integration Tests - Reporter Field Validation', () => {
   it('should handle malformed reporter with missing type', async () => {
     server.use(errorHandlers.badRequestInvalidReporter);
 
+    const resourceWithMalformedReporter = createMockResource({
+      reporter: { instanceId: 'test-app' } as any // Missing type field
+    });
+
     const { result } = renderHook(
       () => useSelfAccessCheck({
         relation: 'view',
-        resource: createInvalidReporterResource('malformed')
+        resource: resourceWithMalformedReporter
       }),
       { wrapper: createTestWrapper() }
     );
@@ -78,10 +79,16 @@ describe('Integration Tests - Reporter Field Validation', () => {
   it('should handle null reporter field', async () => {
     server.use(errorHandlers.badRequestInvalidReporter);
 
+    const resourceWithNullReporter = {
+      id: 'test-id',
+      type: 'workspace',
+      reporter: null
+    } as any;
+
     const { result } = renderHook(
       () => useSelfAccessCheck({
         relation: 'view',
-        resource: createInvalidReporterResource('null')
+        resource: resourceWithNullReporter
       }),
       { wrapper: createTestWrapper() }
     );
