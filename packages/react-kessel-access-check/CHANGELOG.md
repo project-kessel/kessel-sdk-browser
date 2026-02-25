@@ -1,3 +1,7 @@
+## 0.4.1 (2026-02-25)
+
+This was a version bump only for react-kessel-access-check to align it with other projects, there were no code changes.
+
 ## 0.4.0 (2026-02-24)
 
 ### 🚀 Features
