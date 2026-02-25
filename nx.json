@@ -66,11 +66,12 @@
   "release": {
     "projects": ["packages/*"],
     "projectsRelationship": "independent",
+    "git": {
+      "commit": false,
+      "tag": true,
+      "commitMessage": "chore(release): publish {projectName}@{version}"
+    },
     "version": {
-      "git": {
-        "commit": false,
-        "tag": false
-      },
       "currentVersionResolver": "registry",
       "currentVersionResolverMetadata": {
         "tag": "latest"
@@ -92,7 +93,7 @@
       "workspaceChangelog": false,
       "projectChangelogs": {
         "file": "{projectRoot}/CHANGELOG.md",
-        "createReleaseInGitHub": true,
+        "createReleaseInGitHub": false,
         "renderOptions": {
           "authors": false,
           "commitReferences": true,
