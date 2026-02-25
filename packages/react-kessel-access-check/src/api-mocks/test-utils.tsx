@@ -124,3 +124,53 @@ export function isApiError(
     'message' in error
   );
 }
+
+/**
+ * Creates a resource with invalid reporter configuration
+ * Used for testing reporter field validation
+ *
+ * @example
+ * const resource = createInvalidReporterResource('missing');
+ * const resource = createInvalidReporterResource('null');
+ * const resource = createInvalidReporterResource('malformed');
+ */
+export function createInvalidReporterResource(
+  variant: 'missing' | 'null' | 'malformed'
+): any {
+  const base = {
+    id: 'test-id',
+    type: 'workspace',
+  };
+
+  if (variant === 'null') {
+    return { ...base, reporter: null };
+  } else if (variant === 'malformed') {
+    return createMockResource({
+      reporter: { instanceId: 'test-app' } as any,
+    });
+  }
+  // 'missing' - no reporter field at all
+  return base;
+}
+
+/**
+ * Validates that an error object has the expected structure
+ * Used for consistent error shape testing
+ *
+ * @example
+ * expectValidErrorStructure(result.current.error);
+ * expectValidErrorStructure(result.current.error, true); // with details
+ */
+export function expectValidErrorStructure(
+  error: unknown,
+  includeDetails = false
+): void {
+  expect(error).toHaveProperty('code');
+  expect(error).toHaveProperty('message');
+  expect(typeof (error as any)?.code).toBe('number');
+  expect(typeof (error as any)?.message).toBe('string');
+  if (includeDetails) {
+    expect(error).toHaveProperty('details');
+    expect(Array.isArray((error as any)?.details)).toBe(true);
+  }
+}

@@ -17,7 +17,10 @@ import { errorHandlers } from '../../api-mocks/handlers/error-handlers';
 import {
   createTestWrapper,
   createMockResource,
+  createMockResources,
   createMaliciousResource,
+  createInvalidReporterResource,
+  expectValidErrorStructure,
   waitMs,
 } from '../../api-mocks/test-utils';
 import { http, HttpResponse } from 'msw';
@@ -26,6 +29,24 @@ describe('Integration Tests - Critical Scenarios', () => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
+
+  // Helper: Creates MSW handler for tracking empty bulk array calls
+  const createEmptyBulkHandler = (apiCallCountRef: { current: number }) =>
+    http.post('/api/kessel/v1beta2/checkselfbulk', async () => {
+      apiCallCountRef.current++;
+      return HttpResponse.json({
+        pairs: [],
+        consistencyToken: { token: 'should-not-be-called' }
+      });
+    });
+
+  // Helper: Creates MSW handler that validates resource ID in request
+  const createXssValidationHandler = (expectedResourceId: string) =>
+    http.post('/api/kessel/v1beta2/checkself', async ({ request }) => {
+      const body = await request.json() as any;
+      expect(body.object.resourceId).toBe(expectedResourceId);
+      return HttpResponse.json({ allowed: 'ALLOWED_TRUE' });
+    });
 
   describe('1. Empty Resources Array Handling', () => {
     /**
@@ -37,17 +58,8 @@ describe('Integration Tests - Critical Scenarios', () => {
      * Coverage: Prevents unnecessary API calls and potential errors
      */
     it('should handle empty resources array without API call', async () => {
-      let apiCallCount = 0;
-
-      server.use(
-        http.post('/api/kessel/v1beta2/checkselfbulk', async () => {
-          apiCallCount++;
-          return HttpResponse.json({
-            pairs: [],
-            consistencyToken: { token: 'should-not-be-called' }
-          });
-        })
-      );
+      const apiCallCount = { current: 0 };
+      server.use(createEmptyBulkHandler(apiCallCount));
 
       const { result } = renderHook(
         () => useSelfAccessCheck({
@@ -57,13 +69,9 @@ describe('Integration Tests - Critical Scenarios', () => {
         { wrapper: createTestWrapper() }
       );
 
-      // Wait a bit to ensure no API call is made
       await waitMs(100);
 
-      // Should not make API call for empty array
-      expect(apiCallCount).toBe(0);
-
-      // Hook should indicate not loading
+      expect(apiCallCount.current).toBe(0);
       expect(result.current.loading).toBe(false);
     });
 
@@ -71,17 +79,8 @@ describe('Integration Tests - Critical Scenarios', () => {
      * Test: Empty resources array in nested relations mode
      */
     it('should handle empty resources array in nested relations mode', async () => {
-      let apiCallCount = 0;
-
-      server.use(
-        http.post('/api/kessel/v1beta2/checkselfbulk', async () => {
-          apiCallCount++;
-          return HttpResponse.json({
-            pairs: [],
-            consistencyToken: { token: 'should-not-be-called' }
-          });
-        })
-      );
+      const apiCallCount = { current: 0 };
+      server.use(createEmptyBulkHandler(apiCallCount));
 
       const { result } = renderHook(
         () => useSelfAccessCheck({
@@ -92,7 +91,7 @@ describe('Integration Tests - Critical Scenarios', () => {
 
       await waitMs(100);
 
-      expect(apiCallCount).toBe(0);
+      expect(apiCallCount.current).toBe(0);
       expect(result.current.loading).toBe(false);
     });
   });
@@ -109,16 +108,10 @@ describe('Integration Tests - Critical Scenarios', () => {
     it('should handle missing reporter field with clear error', async () => {
       server.use(errorHandlers.badRequestInvalidReporter);
 
-      const resourceWithoutReporter = {
-        id: 'test-id',
-        type: 'workspace',
-        // reporter field missing
-      } as any;
-
       const { result } = renderHook(
         () => useSelfAccessCheck({
           relation: 'view',
-          resource: resourceWithoutReporter
+          resource: createInvalidReporterResource('missing')
         }),
         { wrapper: createTestWrapper() }
       );
@@ -137,14 +130,10 @@ describe('Integration Tests - Critical Scenarios', () => {
     it('should handle malformed reporter with missing type', async () => {
       server.use(errorHandlers.badRequestInvalidReporter);
 
-      const resourceWithMalformedReporter = createMockResource({
-        reporter: { instanceId: 'test-app' } as any // Missing type field
-      });
-
       const { result } = renderHook(
         () => useSelfAccessCheck({
           relation: 'view',
-          resource: resourceWithMalformedReporter
+          resource: createInvalidReporterResource('malformed')
         }),
         { wrapper: createTestWrapper() }
       );
@@ -161,16 +150,10 @@ describe('Integration Tests - Critical Scenarios', () => {
     it('should handle null reporter field', async () => {
       server.use(errorHandlers.badRequestInvalidReporter);
 
-      const resourceWithNullReporter = {
-        id: 'test-id',
-        type: 'workspace',
-        reporter: null
-      } as any;
-
       const { result } = renderHook(
         () => useSelfAccessCheck({
           relation: 'view',
-          resource: resourceWithNullReporter
+          resource: createInvalidReporterResource('null')
         }),
         { wrapper: createTestWrapper() }
       );
@@ -281,13 +264,8 @@ describe('Integration Tests - Critical Scenarios', () => {
     it('should handle 401 on bulk check', async () => {
       server.use(errorHandlers.unauthorizedBulk);
 
-      const resources = [
-        createMockResource({ id: 'resource-1' }),
-        createMockResource({ id: 'resource-2' })
-      ];
-
       const { result } = renderHook(
-        () => useSelfAccessCheck({ relation: 'view', resources: resources as any }),
+        () => useSelfAccessCheck({ relation: 'view', resources: createMockResources(2) as any }),
         { wrapper: createTestWrapper() }
       );
 
@@ -312,11 +290,7 @@ describe('Integration Tests - Critical Scenarios', () => {
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
-      const error = result.current.error;
-      expect(error).toHaveProperty('code');
-      expect(error).toHaveProperty('message');
-      expect(typeof error?.code).toBe('number');
-      expect(typeof error?.message).toBe('string');
+      expectValidErrorStructure(result.current.error);
     });
   });
 
@@ -357,13 +331,8 @@ describe('Integration Tests - Critical Scenarios', () => {
     it('should handle 403 on bulk check', async () => {
       server.use(errorHandlers.forbiddenBulk);
 
-      const resources = [
-        createMockResource({ id: 'resource-1' }),
-        createMockResource({ id: 'resource-2' })
-      ];
-
       const { result } = renderHook(
-        () => useSelfAccessCheck({ relation: 'view', resources: resources as any }),
+        () => useSelfAccessCheck({ relation: 'view', resources: createMockResources(2) as any }),
         { wrapper: createTestWrapper() }
       );
 
@@ -436,13 +405,7 @@ describe('Integration Tests - Critical Scenarios', () => {
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
-      const error = result.current.error;
-      expect(error).toHaveProperty('code');
-      expect(error).toHaveProperty('message');
-      expect(error).toHaveProperty('details');
-      expect(typeof error?.code).toBe('number');
-      expect(typeof error?.message).toBe('string');
-      expect(Array.isArray(error?.details)).toBe(true);
+      expectValidErrorStructure(result.current.error, true);
     });
   });
 
@@ -477,13 +440,8 @@ describe('Integration Tests - Critical Scenarios', () => {
     it('should handle invalid JSON on bulk endpoint', async () => {
       server.use(errorHandlers.invalidJsonBulk);
 
-      const resources = [
-        createMockResource({ id: 'resource-1' }),
-        createMockResource({ id: 'resource-2' })
-      ];
-
       const { result } = renderHook(
-        () => useSelfAccessCheck({ relation: 'view', resources: resources as any }),
+        () => useSelfAccessCheck({ relation: 'view', resources: createMockResources(2) as any }),
         { wrapper: createTestWrapper() }
       );
 
@@ -523,18 +481,9 @@ describe('Integration Tests - Critical Scenarios', () => {
      * Coverage: XSS prevention, input sanitization
      */
     it('should safely handle script tags in resource ID', async () => {
-      server.use(
-        http.post('/api/kessel/v1beta2/checkself', async ({ request }) => {
-          const body = await request.json() as any;
-
-          // Verify the payload was sent as-is (not executed)
-          expect(body.object.resourceId).toBe('<script>alert("xss")</script>');
-
-          return HttpResponse.json({ allowed: 'ALLOWED_TRUE' });
-        })
-      );
-
       const maliciousResource = createMaliciousResource('xss');
+      server.use(createXssValidationHandler(maliciousResource.id));
+
       const { result } = renderHook(
         () => useSelfAccessCheck({ relation: 'view', resource: maliciousResource }),
         { wrapper: createTestWrapper() }
@@ -542,7 +491,6 @@ describe('Integration Tests - Critical Scenarios', () => {
 
       await waitFor(() => expect(result.current.loading).toBe(false));
 
-      // Should complete successfully without executing script
       expect(result.current.data?.allowed).toBe(true);
       expect(result.current.data?.resource.id).toBe('<script>alert("xss")</script>');
     });
@@ -551,17 +499,9 @@ describe('Integration Tests - Critical Scenarios', () => {
      * Test: SQL injection patterns in resource type
      */
     it('should safely handle SQL injection patterns', async () => {
-      server.use(
-        http.post('/api/kessel/v1beta2/checkself', async ({ request }) => {
-          const body = await request.json() as any;
-
-          expect(body.object.resourceId).toBe("'; DROP TABLE users; --");
-
-          return HttpResponse.json({ allowed: 'ALLOWED_TRUE' });
-        })
-      );
-
       const maliciousResource = createMaliciousResource('sql');
+      server.use(createXssValidationHandler(maliciousResource.id));
+
       const { result } = renderHook(
         () => useSelfAccessCheck({ relation: 'view', resource: maliciousResource }),
         { wrapper: createTestWrapper() }
@@ -576,17 +516,9 @@ describe('Integration Tests - Critical Scenarios', () => {
      * Test: JSON injection / prototype pollution
      */
     it('should safely handle JSON injection patterns', async () => {
-      server.use(
-        http.post('/api/kessel/v1beta2/checkself', async ({ request }) => {
-          const body = await request.json() as any;
-
-          expect(body.object.resourceId).toBe('{"__proto__":{"isAdmin":true}}');
-
-          return HttpResponse.json({ allowed: 'ALLOWED_TRUE' });
-        })
-      );
-
       const maliciousResource = createMaliciousResource('json');
+      server.use(createXssValidationHandler(maliciousResource.id));
+
       const { result } = renderHook(
         () => useSelfAccessCheck({ relation: 'view', resource: maliciousResource }),
         { wrapper: createTestWrapper() }
@@ -595,8 +527,6 @@ describe('Integration Tests - Critical Scenarios', () => {
       await waitFor(() => expect(result.current.loading).toBe(false));
 
       expect(result.current.data?.allowed).toBe(true);
-
-      // Verify no prototype pollution occurred
       expect((Object.prototype as any).isAdmin).toBeUndefined();
     });
 
@@ -604,17 +534,9 @@ describe('Integration Tests - Critical Scenarios', () => {
      * Test: Unicode and special characters
      */
     it('should safely handle unicode and special characters', async () => {
-      server.use(
-        http.post('/api/kessel/v1beta2/checkself', async ({ request }) => {
-          const body = await request.json() as any;
-
-          expect(body.object.resourceId).toBe('测试\u0000\uFFFD💩');
-
-          return HttpResponse.json({ allowed: 'ALLOWED_TRUE' });
-        })
-      );
-
       const maliciousResource = createMaliciousResource('unicode');
+      server.use(createXssValidationHandler(maliciousResource.id));
+
       const { result } = renderHook(
         () => useSelfAccessCheck({ relation: 'view', resource: maliciousResource }),
         { wrapper: createTestWrapper() }
