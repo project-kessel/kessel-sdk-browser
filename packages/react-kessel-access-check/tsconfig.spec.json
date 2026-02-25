@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "declarationMap": false
   },
   "include": [
     "jest.config.js",
@@ -11,6 +12,8 @@
     "src/**/*.test.tsx",
     "src/**/*.spec.tsx",
     "src/**/*.d.ts",
-    "src/setupTests.ts"
+    "src/setupTests.ts",
+    "src/api-mocks/**/*",
+    "src/__tests__/**/*"
   ]
 }
