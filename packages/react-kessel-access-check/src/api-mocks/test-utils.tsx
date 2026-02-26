@@ -124,3 +124,25 @@ export function isApiError(
     'message' in error
   );
 }
+
+/**
+ * Validates that an error object has the expected structure
+ * Used for consistent error shape testing
+ *
+ * @example
+ * expectValidErrorStructure(result.current.error);
+ * expectValidErrorStructure(result.current.error, true); // with details
+ */
+export function expectValidErrorStructure(
+  error: unknown,
+  includeDetails = false
+): void {
+  expect(error).toHaveProperty('code');
+  expect(error).toHaveProperty('message');
+  expect(typeof (error as any)?.code).toBe('number');
+  expect(typeof (error as any)?.message).toBe('string');
+  if (includeDetails) {
+    expect(error).toHaveProperty('details');
+    expect(Array.isArray((error as any)?.details)).toBe(true);
+  }
+}

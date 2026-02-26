@@ -66,6 +66,17 @@ kessel-sdk-browser/
 │       │   ├── core/
 │       │   │   ├── api-client.ts          # Fetch logic for API calls
 │       │   │   └── transformers.ts        # Request/response transformations
+│       │   ├── api-mocks/                 # Test infrastructure
+│       │   │   ├── handlers/
+│       │   │   │   ├── success-handlers.ts # MSW success scenarios
+│       │   │   │   ├── error-handlers.ts   # MSW error scenarios
+│       │   │   │   └── index.ts           # Handler exports
+│       │   │   ├── msw-server.ts          # MSW server setup
+│       │   │   └── test-utils.tsx         # Test helper functions
+│       │   ├── __tests__/
+│       │   │   ├── integration/
+│       │   │   │   └── critical-scenarios.test.tsx
+│       │   │   └── docs/                  # Test documentation
 │       │   ├── AccessCheckContext.tsx     # React Context definition
 │       │   ├── AccessCheckProvider.tsx    # Provider component
 │       │   ├── hooks.ts                   # useSelfAccessCheck hook
@@ -240,14 +251,25 @@ test('should handle 401 error', async () => {
 Helper functions for writing tests:
 - `createTestWrapper(config?)` - Provider wrapper for renderHook
 - `createMockResource(overrides?)` - Factory for mock resources
-- `createMockResources(count)` - Generate multiple resources
-- `createMaliciousResource(type)` - Security testing payloads
+- `createMockResources(count, overrides?)` - Generate multiple resources
+- `createMaliciousResource(type)` - Security testing payloads (XSS, SQL injection, etc.)
+- `createInvalidReporterResource(variant)` - Invalid reporter configurations ('missing', 'null', 'malformed')
+- `expectValidErrorStructure(error, includeDetails?)` - Validates error object shape
+- `waitMs(ms)` - Promise delay for testing loading states
+- `isApiError(error)` - Type guard for API errors
 
-**Example test:**
+**Example tests:**
 ```typescript
 import { renderHook, waitFor } from '@testing-library/react';
-import { createTestWrapper, createMockResource } from '../api-mocks/test-utils';
+import {
+  createTestWrapper,
+  createMockResource,
+  createMockResources,
+  createInvalidReporterResource,
+  expectValidErrorStructure
+} from '../api-mocks/test-utils';
 
+// Basic permission check
 test('should check permission', async () => {
   const resource = createMockResource({ id: 'ws-123' });
   const { result } = renderHook(
@@ -257,6 +279,31 @@ test('should check permission', async () => {
 
   await waitFor(() => expect(result.current.loading).toBe(false));
   expect(result.current.data?.allowed).toBe(true);
+});
+
+// Bulk check with multiple resources
+test('should check multiple resources', async () => {
+  const resources = createMockResources(5); // Creates 5 resources
+  const { result } = renderHook(
+    () => useSelfAccessCheck({ relation: 'view', resources }),
+    { wrapper: createTestWrapper() }
+  );
+
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  expect(result.current.data).toHaveLength(5);
+});
+
+// Error validation
+test('should handle missing reporter field', async () => {
+  const resource = createInvalidReporterResource('missing');
+  const { result } = renderHook(
+    () => useSelfAccessCheck({ relation: 'view', resource }),
+    { wrapper: createTestWrapper() }
+  );
+
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  expectValidErrorStructure(result.current.error, true);
+  expect(result.current.error?.code).toBe(400);
 });
 ```
 
@@ -286,7 +333,9 @@ Resource types are not hardcoded in the SDK. They're strings passed through to t
 
 1. Update transformer functions in `src/core/transformers.ts`
 2. Update API client in `src/core/api-client.ts` if needed
-3. Update MSW handlers in `src/api-mocks/handlers.ts` for tests
+3. Update MSW handlers in `src/api-mocks/handlers/` for tests:
+   - `success-handlers.ts` for happy path scenarios
+   - `error-handlers.ts` for error scenarios
 4. Update types in `src/types.ts` if needed
 5. Update tests to match new format
 

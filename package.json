@@ -12,6 +12,10 @@
     "test": "nx run-many --target=test",
     "test:watch": "nx run-many --target=test --watch",
     "test:coverage": "nx run-many --target=test --coverage",
+    "test:unit": "jest --config=packages/react-kessel-access-check/jest.config.unit.js",
+    "test:integration": "jest --config=packages/react-kessel-access-check/jest.config.integration.js",
+    "test:unit:coverage": "jest --config=packages/react-kessel-access-check/jest.config.unit.js --coverage",
+    "test:integration:coverage": "jest --config=packages/react-kessel-access-check/jest.config.integration.js --coverage",
     "lint": "nx run-many --target=lint",
     "lint:fix": "nx run-many --target=lint --fix",
     "typecheck": "tsc --noEmit"
@@ -27,12 +31,13 @@
     "oauth4webapi": "^3.5.5"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
     "@eslint/js": "^9.39.1",
     "@nx/jest": "^22.1.3",
     "@nx/js": "^22.1.3",
     "@swc-node/register": "~1.9.1",
-    "@swc/core": "~1.5.7",
+    "@swc/core": "~1.13.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@types/jest": "^30.0.0",

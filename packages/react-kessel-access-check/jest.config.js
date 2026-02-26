@@ -17,5 +17,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   transformIgnorePatterns: [
     'node_modules/(?!(msw|@mswjs|until-async)/)'
-  ]
+  ],
+  // Restart workers to prevent memory accumulation
+  maxWorkers: '50%',
+  workerIdleMemoryLimit: '512MB'
 };
