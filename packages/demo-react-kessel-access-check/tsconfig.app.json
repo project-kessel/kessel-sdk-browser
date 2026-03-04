@@ -22,7 +22,12 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "paths": {
+      "@project-kessel/react-kessel-access-check": [
+        "../react-kessel-access-check/src/index.ts"
+      ]
+    }
   },
   "include": ["src"]
 }

@@ -77,6 +77,16 @@ For comprehensive documentation, see:
   - TypeScript support with function overloads
   - HCC (Hybrid Cloud Console) integration
 
+## Example App
+
+The [demo-react-kessel-access-check](./packages/demo-react-kessel-access-check) app is an interactive demo that showcases all SDK features — single resource checks, bulk same-relation checks, and bulk nested-relation checks. It uses MSW to mock the Kessel backend, so no real server is needed.
+
+```bash
+npx nx run demo-react-kessel-access-check:dev
+```
+
+The app resolves the SDK from local source, so any changes you make to the SDK are immediately reflected in the demo.
+
 ## Development
 
 This is an NX-based monorepo. NX provides intelligent caching and task execution for faster builds.
@@ -163,25 +173,24 @@ kessel-sdk-browser/
 │   └── actions/
 │       └── release/                   # Release automation
 ├── packages/
-│   └── react-kessel-access-check/
-│       ├── src/
-│       │   ├── core/                  # Core utilities
-│       │   │   ├── api-client.ts      # Access check API functions
-│       │   │   ├── workspace-client.ts # RBAC workspace ID helpers
-│       │   │   └── transformers.ts    # Response transformers
-│       │   ├── AccessCheckContext.tsx
-│       │   ├── AccessCheckProvider.tsx
-│       │   ├── hooks.ts               # Access check hooks
-│       │   ├── types.ts
-│       │   └── index.ts
-│       ├── package.json
-│       ├── project.json               # NX project configuration
-│       ├── CHANGELOG.md               # Auto-generated changelog
-│       ├── tsconfig.lib.json
-│       ├── tsconfig.spec.json
-│       └── jest.config.js
-├── examples/
-│   └── demo-react-kessel-access-check/ # Example React app
+│   ├── react-kessel-access-check/
+│   │   ├── src/
+│   │   │   ├── core/                  # Core utilities
+│   │   │   │   ├── api-client.ts      # Access check API functions
+│   │   │   │   ├── workspace-client.ts # RBAC workspace ID helpers
+│   │   │   │   └── transformers.ts    # Response transformers
+│   │   │   ├── AccessCheckContext.tsx
+│   │   │   ├── AccessCheckProvider.tsx
+│   │   │   ├── hooks.ts               # Access check hooks
+│   │   │   ├── types.ts
+│   │   │   └── index.ts
+│   │   ├── package.json
+│   │   ├── project.json               # NX project configuration
+│   │   ├── CHANGELOG.md               # Auto-generated changelog
+│   │   ├── tsconfig.lib.json
+│   │   ├── tsconfig.spec.json
+│   │   └── jest.config.js
+│   └── demo-react-kessel-access-check/ # Example React app (NX-managed)
 ├── .commitlintrc.json                 # Commit message validation
 ├── package.json                       # Root workspace configuration
 ├── nx.json                            # NX workspace configuration

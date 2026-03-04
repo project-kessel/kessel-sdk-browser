@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@project-kessel/react-kessel-access-check": "^0.3.2",
+    "@project-kessel/react-kessel-access-check": "*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

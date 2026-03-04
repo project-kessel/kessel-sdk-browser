@@ -4,7 +4,7 @@
   "description": "Monorepo for Kessel SDKs including browser and Node.js packages",
   "private": true,
   "workspaces": [
-    "packages/react-kessel-access-check"
+    "packages/*"
   ],
   "scripts": {
     "nx": "nx",

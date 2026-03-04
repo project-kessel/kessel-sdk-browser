@@ -78,6 +78,13 @@ jobs:
           fi
           echo "Build artifacts verified successfully"
 
+      - name: Verify example app builds
+        run: |
+          if [ ! -d "packages/demo-react-kessel-access-check/dist" ]; then
+            echo "Example app build failed: dist directory not found"
+            exit 1
+          fi
+
   commitlint:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'

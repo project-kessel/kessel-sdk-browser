@@ -64,7 +64,7 @@
     }
   },
   "release": {
-    "projects": ["packages/*"],
+    "projects": ["packages/*", "!demo-*"],
     "projectsRelationship": "independent",
     "git": {
       "commit": true,
