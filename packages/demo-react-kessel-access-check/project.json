@@ -4,24 +4,25 @@
   "tags": ["type:app", "scope:example"],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:build",
       "dependsOn": ["^build"],
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "command": "npx vite build",
-        "cwd": "packages/demo-react-kessel-access-check"
+        "outputPath": "packages/demo-react-kessel-access-check/dist",
+        "skipTypeCheck": true,
+        "configFile": "packages/demo-react-kessel-access-check/vite.config.ts"
+      }
+    },
+    "serve": {
+      "executor": "@nx/vite:dev-server",
+      "options": {
+        "buildTarget": "demo-react-kessel-access-check:build"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
         "command": "npx eslint .",
-        "cwd": "packages/demo-react-kessel-access-check"
-      }
-    },
-    "dev": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "npx vite",
         "cwd": "packages/demo-react-kessel-access-check"
       }
     }
