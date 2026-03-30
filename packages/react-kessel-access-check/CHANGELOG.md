@@ -1,3 +1,9 @@
+## 0.4.3 (2026-03-30)
+
+### 🚀 Features
+
+- **Kessel:** add default max limit 1000 ([#46](https://github.com/project-kessel/kessel-sdk-browser/pull/46))
+
 ## 0.4.2 (2026-03-09)
 
 This was a version bump only for react-kessel-access-check to align it with other projects, there were no code changes.
