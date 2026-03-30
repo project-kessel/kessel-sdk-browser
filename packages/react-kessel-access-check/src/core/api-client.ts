@@ -7,16 +7,26 @@ import type {
   ReporterReference,
 } from '../types';
 
+export const CHECK_SELF_BULK_MAX_ITEMS = 1000;
+
 export type BulkCheckConfig = {
   bulkRequestLimit?: number;
-}
+};
 
 // API Configuration
 export type ApiConfig = {
   baseUrl: string;
   apiPath: string;
-  bulkCheckConfig?: BulkCheckConfig
+  bulkCheckConfig?: BulkCheckConfig;
 };
+
+function resolveBulkChunkSize(config: ApiConfig): number {
+  const raw = config.bulkCheckConfig?.bulkRequestLimit;
+  if (typeof raw === 'number' && raw > 0) {
+    return raw;
+  }
+  return CHECK_SELF_BULK_MAX_ITEMS;
+}
 
 // API Request/Response Types
 type CheckSelfRequest = {
@@ -167,11 +177,11 @@ export async function checkSelfBulk(
     return fetchSelfBulk(url, { items: [], consistency: params.consistency });
   }
 
-  const bulkLimit = config.bulkCheckConfig?.bulkRequestLimit && config.bulkCheckConfig?.bulkRequestLimit > 0 ? config.bulkCheckConfig.bulkRequestLimit : Number.MAX_SAFE_INTEGER;
+  const chunkSize = resolveBulkChunkSize(config);
 
   const payloads: CheckSelfBulkRequest[] = [];
-  for(let i = 0; i < params.items.length; i += bulkLimit){
-    const chunks = params.items.slice(i, i + bulkLimit);
+  for (let i = 0; i < params.items.length; i += chunkSize) {
+    const chunks = params.items.slice(i, i + chunkSize);
     const payload: CheckSelfBulkRequest = {
       items: chunks.map(item => ({
         object: {

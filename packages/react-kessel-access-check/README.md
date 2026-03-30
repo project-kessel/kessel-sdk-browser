@@ -96,7 +96,7 @@ The main provider component that wraps your application and provides access chec
 |------|------|----------|-------------|
 | `baseUrl` | `string` | Yes | The base URL for the API server (e.g., `https://console.redhat.com`) |
 | `apiPath` | `string` | Yes | The base path for the access check API endpoints (e.g., `/api/kessel/v1beta2`) |
-| `bulkCheckConfig` | `{ bulkRequestLimit?: number }` | No | Configuration for bulk access checks. Set `bulkRequestLimit` to limit the number of items per bulk request |
+| `bulkCheckConfig` | `{ bulkRequestLimit?: number }` | No | Optional chunk size for bulk checks. If omitted, defaults to **1000**. Set `bulkRequestLimit` to limit the number of items per bulk request |
 | `children` | `ReactNode` | Yes | Child components that will have access to the access check hooks |
 
 #### Example

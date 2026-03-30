@@ -247,19 +247,29 @@ describe('api-client', () => {
       expect(result.pairs).toHaveLength(3);
     });
 
-    test('should handle zero or negative bulkRequestLimit as unlimited', async () => {
+    test('should treat non-positive bulkRequestLimit as default chunk size (1000)', async () => {
       const configWithZeroLimit = {
         baseUrl: '',
         apiPath: '/api/kessel/v1beta2',
-        bulkCheckConfig: { bulkRequestLimit: 0 }
+        bulkCheckConfig: { bulkRequestLimit: 0 },
       };
       const items = createMockItems(2000);
 
       const result = await checkSelfBulk(configWithZeroLimit, { items });
 
-      expect(requestBodies).toHaveLength(1);
-      expect(requestBodies[0].items).toHaveLength(2000);
+      expect(requestBodies).toHaveLength(2);
+      expect(requestBodies[0].items).toHaveLength(1000);
+      expect(requestBodies[1].items).toHaveLength(1000);
       expect(result.pairs).toHaveLength(2000);
+    });
+
+    test('should use default limit of 1000 when bulkCheckConfig is omitted', async () => {
+      const items = createMockItems(1500);
+      const result = await checkSelfBulk({ baseUrl: '', apiPath: '/api/kessel/v1beta2' }, { items });
+      expect(requestBodies).toHaveLength(2);
+      expect(requestBodies[0].items).toHaveLength(1000);
+      expect(requestBodies[1].items).toHaveLength(500);
+      expect(result.pairs).toHaveLength(1500);
     });
 
     test('should pass through consistency configuration to all chunks', async () => {
