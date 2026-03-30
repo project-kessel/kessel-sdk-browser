@@ -1,3 +1,9 @@
+## 0.5.0 (2026-03-30)
+
+### 🚀 Features
+
+- **react-kessel-access-check:** do a minor release ([a9bf11b](https://github.com/project-kessel/kessel-sdk-browser/commit/a9bf11b))
+
 ## 0.4.4 (2026-03-30)
 
 This was a version bump only for react-kessel-access-check to align it with other projects, there were no code changes.
