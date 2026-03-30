@@ -18,6 +18,16 @@
         "build"
       ]
     ],
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "react-kessel-access-check",
+        "demo-react-kessel-access-check",
+        "release"
+      ]
+    ],
+    "scope-empty": [1, "never"],
     "header-max-length": [0],
     "body-max-line-length": [0],
     "body-max-length": [0]
