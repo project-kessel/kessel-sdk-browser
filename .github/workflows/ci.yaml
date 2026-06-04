@@ -7,8 +7,7 @@ on:
   pull_request:
 
 permissions:
-  id-token: write  # For NPM trusted publishing
-  contents: write  # For git push
+  contents: read
 
 jobs:
   ci:
@@ -109,13 +108,19 @@ jobs:
   release:
     runs-on: ubuntu-latest
     needs: [ci]
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    # Only run on push to master branch (never on workflow_dispatch, etc.)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    permissions:
+      contents: write    # Needed for creating tags and GitHub releases
+      issues: write      # Needed for release notes
+      pull-requests: write  # Needed for release notes
+      id-token: write    # Needed for OIDC token generation (npm trusted publishing)
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # Use default GITHUB_TOKEN for authentication (no SSH key needed)
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
