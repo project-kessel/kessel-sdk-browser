@@ -254,7 +254,7 @@ const errors = checks?.filter(check => check.error);
 
 Async helper functions for fetching workspace IDs from the RBAC API. These are useful when the resource you need to perform an access check against is a workspace, and you need its UUID.
 
-These call `GET /api/rbac/v2/workspaces/?type={root|default}` and return the first matching workspace.
+These call `GET /api/rbac/v2/workspaces/?type={root|default}&with_ancestry=true` and return the first matching workspace.
 
 Follows the [Kessel SDK client API spec for `rbac.v2`](https://project-kessel.github.io/docs/contributing/client-api/rbacv2/).
 
@@ -790,7 +790,7 @@ Checks if the current user has the specified level of access to multiple resourc
 
 ### List Workspaces (RBAC v2)
 
-**GET** `/api/rbac/v2/workspaces/?type={type}`
+**GET** `/api/rbac/v2/workspaces/?type={type}&with_ancestry=true`
 
 Retrieves workspaces filtered by type. Used by `fetchRootWorkspace` and `fetchDefaultWorkspace`.
 
@@ -800,6 +800,7 @@ Defined in the [RBAC v2 OpenAPI spec](https://github.com/RedHatInsights/insights
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `type` | `root` \| `default` \| `standard` \| `ungrouped-hosts` \| `all` | Filter workspaces by type |
+| `with_ancestry` | `true` | Include ancestor workspaces in the response. |
 
 **Response** (`Workspaces.WorkspaceListResponse`):
 ```json

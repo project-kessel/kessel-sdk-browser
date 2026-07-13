@@ -37,7 +37,7 @@ describe('workspace-client', () => {
       expect(result).toEqual(mockWorkspace);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.example.com/api/rbac/v2/workspaces/?type=root',
+        'https://api.example.com/api/rbac/v2/workspaces/?type=root&with_ancestry=true',
         expect.objectContaining({
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -55,7 +55,9 @@ describe('workspace-client', () => {
       await fetchRootWorkspace('https://api.example.com///');
 
       const calledUrl = mockFetch.mock.calls[0][0];
-      expect(calledUrl).toBe('https://api.example.com/api/rbac/v2/workspaces/?type=root');
+      expect(calledUrl).toBe(
+        'https://api.example.com/api/rbac/v2/workspaces/?type=root&with_ancestry=true',
+      );
     });
 
     it('should throw on empty data array', async () => {
@@ -150,7 +152,7 @@ describe('workspace-client', () => {
       expect(result).toEqual(mockWorkspace);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.example.com/api/rbac/v2/workspaces/?type=default',
+        'https://api.example.com/api/rbac/v2/workspaces/?type=default&with_ancestry=true',
         expect.objectContaining({
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -286,7 +288,7 @@ describe('workspace-client', () => {
 
       expect(result.id).toBe('ws1');
       expect(customFetch).toHaveBeenCalledWith(
-        'https://api.example.com/api/rbac/v2/workspaces/?type=root',
+        'https://api.example.com/api/rbac/v2/workspaces/?type=root&with_ancestry=true',
         expect.objectContaining({
           method: 'GET',
           credentials: 'include',

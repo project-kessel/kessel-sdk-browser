@@ -44,7 +44,7 @@ export type HttpClient = typeof fetch;
 /**
  * Internal helper to fetch a workspace by type ("root" or "default").
  *
- * Makes a GET request to: {rbacBaseEndpoint}/api/rbac/v2/workspaces/?type={workspaceType}
+ * Makes a GET request to: {rbacBaseEndpoint}/api/rbac/v2/workspaces/?type={workspaceType}&with_ancestry=true
  *
  * @param rbacBaseEndpoint - The RBAC service endpoint URL (e.g. "https://console.redhat.com")
  * @param workspaceType - The workspace type to query for ("root" or "default")
@@ -58,7 +58,7 @@ export async function fetchWorkspaceByType(
   httpClient?: HttpClient,
 ): Promise<Workspace> {
   const fetchFn = httpClient ?? fetch;
-  const url = `${rbacBaseEndpoint.replace(/\/+$/, '')}${WORKSPACE_API_PATH}?type=${workspaceType}`;
+  const url = `${rbacBaseEndpoint.replace(/\/+$/, '')}${WORKSPACE_API_PATH}?type=${workspaceType}&with_ancestry=true`;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ export async function fetchWorkspaceByType(
 /**
  * Fetches the root workspace for the current organization.
  *
- * GET {rbacBaseEndpoint}/api/rbac/v2/workspaces/?type=root
+ * GET {rbacBaseEndpoint}/api/rbac/v2/workspaces/?type=root&with_ancestry=true
  *
  * @param rbacBaseEndpoint - The RBAC service endpoint URL (stage/prod/ephemeral)
  * @param auth - Optional authentication configuration.
@@ -120,7 +120,7 @@ export async function fetchRootWorkspace(
 /**
  * Fetches the default workspace for the current organization.
  *
- * GET {rbacBaseEndpoint}/api/rbac/v2/workspaces/?type=default
+ * GET {rbacBaseEndpoint}/api/rbac/v2/workspaces/?type=default&with_ancestry=true
  *
  * @param rbacBaseEndpoint - The RBAC service endpoint URL (stage/prod/ephemeral)
  * @param auth - Optional authentication configuration.
