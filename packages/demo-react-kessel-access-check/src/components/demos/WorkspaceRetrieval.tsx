@@ -15,11 +15,20 @@ const code = `import {
   fetchDefaultWorkspace
 } from '@project-kessel/react-kessel-access-check';
 
-// Fetch the default workspace
+// SDK helpers always request with_ancestry=true so fallback workspaces
+// (root, default) are included even without explicit inventory permission
 const workspace = await fetchDefaultWorkspace(
   'https://console.redhat.com',
   { headers: { Authorization: \`Bearer \${token}\` } }
 );
+
+// Without with_ancestry, only workspaces you have explicit permission for are returned.
+// Users with access still see default/root; this mock simulates an account without it:
+const response = await fetch(
+  'https://console.redhat.com/api/rbac/v2/workspaces/?type=default',
+  { credentials: 'include' }
+);
+const { data } = await response.json(); // data: []
 
 // Use workspace.id as the resource ID in access checks
 const resource = {
@@ -30,7 +39,7 @@ const resource = {
 
 type FetchState = {
   loading: boolean;
-  data: Workspace | null;
+  data: Workspace[] | null;
   error: unknown;
 };
 
@@ -39,12 +48,13 @@ const initial: FetchState = { loading: false, data: null, error: null };
 export default function WorkspaceRetrieval() {
   const [root, setRoot] = useState<FetchState>(initial);
   const [def, setDef] = useState<FetchState>(initial);
+  const [withoutAncestry, setWithoutAncestry] = useState<FetchState>(initial);
 
   async function handleFetchRoot() {
     setRoot({ loading: true, data: null, error: null });
     try {
       const ws = await fetchRootWorkspace(RBAC_BASE);
-      setRoot({ loading: false, data: ws, error: null });
+      setRoot({ loading: false, data: [ws], error: null });
     } catch (err) {
       setRoot({ loading: false, data: null, error: err });
     }
@@ -54,16 +64,34 @@ export default function WorkspaceRetrieval() {
     setDef({ loading: true, data: null, error: null });
     try {
       const ws = await fetchDefaultWorkspace(RBAC_BASE);
-      setDef({ loading: false, data: ws, error: null });
+      setDef({ loading: false, data: [ws], error: null });
     } catch (err) {
       setDef({ loading: false, data: null, error: err });
+    }
+  }
+
+  async function handleFetchDefaultWithoutAncestry() {
+    setWithoutAncestry({ loading: true, data: null, error: null });
+    try {
+      const response = await fetch(
+        `${RBAC_BASE}/api/rbac/v2/workspaces/?type=default`,
+        { credentials: 'include' },
+      );
+      const { data } = await response.json() as { data?: Workspace[] };
+      setWithoutAncestry({
+        loading: false,
+        data: data ?? [],
+        error: null,
+      });
+    } catch (err) {
+      setWithoutAncestry({ loading: false, data: null, error: err });
     }
   }
 
   return (
     <DemoSection
       title="4. Workspace Retrieval"
-      description="Fetch root and default workspace IDs from RBAC using the helper functions. These call GET /api/rbac/v2/workspaces/?type=root|default and return the workspace object, which you can then use as a resource ID in access checks."
+      description="Fetch root and default workspace IDs via the SDK helpers (with with_ancestry=true), or compare with a raw API call. The with_ancestry param includes fallback workspaces when you lack explicit permission — users who already have access see them either way. This mock simulates the no-permission case."
     >
       <div className="demo-controls">
         <div className="control-group">
@@ -87,6 +115,17 @@ export default function WorkspaceRetrieval() {
             {def.loading ? 'Fetching...' : 'Fetch Default'}
           </button>
         </div>
+
+        <div className="control-group">
+          <label>Default (no with_ancestry)</label>
+          <button
+            className="action-button"
+            onClick={handleFetchDefaultWithoutAncestry}
+            disabled={withoutAncestry.loading}
+          >
+            {withoutAncestry.loading ? 'Fetching...' : 'Raw fetch'}
+          </button>
+        </div>
       </div>
 
       <div className="demo-result">
@@ -96,7 +135,7 @@ export default function WorkspaceRetrieval() {
             <span>Fetching root workspace...</span>
           </div>
         )}
-        {root.data && <WorkspaceCard label="Root Workspace" workspace={root.data} />}
+        {root.data?.[0] && <WorkspaceCard label="Root Workspace" workspace={root.data[0]} />}
         {root.error !== null && <WorkspaceError label="Root Workspace" error={root.error} />}
 
         {def.loading && (
@@ -105,8 +144,24 @@ export default function WorkspaceRetrieval() {
             <span>Fetching default workspace...</span>
           </div>
         )}
-        {def.data && <WorkspaceCard label="Default Workspace" workspace={def.data} />}
+        {def.data?.[0] && <WorkspaceCard label="Default Workspace" workspace={def.data[0]} />}
         {def.error !== null && <WorkspaceError label="Default Workspace" error={def.error} />}
+
+        {withoutAncestry.loading && (
+          <div className="loading-container">
+            <Spinner />
+            <span>Fetching default workspace without with_ancestry...</span>
+          </div>
+        )}
+        {withoutAncestry.data?.[0] && (
+          <WorkspaceCard label="Default (no with_ancestry)" workspace={withoutAncestry.data[0]} />
+        )}
+        {withoutAncestry.data?.length === 0 && (
+          <EmptyListResult label="Default (no with_ancestry)" />
+        )}
+        {withoutAncestry.error !== null && (
+          <WorkspaceError label="Default (no with_ancestry)" error={withoutAncestry.error} />
+        )}
       </div>
 
       <CodeBlock code={code} />
@@ -137,6 +192,27 @@ function WorkspaceCard({ label, workspace }: { label: string; workspace: Workspa
               <strong>Parent ID:</strong> <code>{workspace.parent_id}</code>
             </>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptyListResult({ label }: { label: string }) {
+  return (
+    <div
+      className="success-message"
+      style={{ marginBottom: '1rem', background: '#fff8c5', borderColor: 'var(--warning)', color: '#7d4e00' }}
+    >
+      <div className="success-content">
+        <div className="success-text">{label}</div>
+        <div className="success-details">
+          API returned <strong>200 OK</strong> with an empty <code>data</code> list.
+          Without <code>with_ancestry</code>, only workspaces you have explicit inventory
+          permission for are returned — if you had access, default/root would appear here too.
+          This mock simulates an account without that permission;{' '}
+          <code>with_ancestry=true</code> adds fallback workspaces anyway, which is why the SDK
+          helpers always pass it.
         </div>
       </div>
     </div>

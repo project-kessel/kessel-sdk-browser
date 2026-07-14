@@ -104,6 +104,23 @@ export const handlers = [
     const url = new URL(request.url);
     const type = url.searchParams.get('type');
 
+    if (type !== 'root' && type !== 'default') {
+      return HttpResponse.json(
+        { code: 400, message: `Invalid workspace type: ${type}`, details: [] },
+        { status: 400 }
+      );
+    }
+
+    const withAncestry = url.searchParams.get('with_ancestry') === 'true';
+
+    if (!withAncestry) {
+      return HttpResponse.json({
+        meta: { count: 0, limit: 10, offset: 0 },
+        links: { first: null, next: null, previous: null, last: null },
+        data: [],
+      });
+    }
+
     if (type === 'root') {
       return HttpResponse.json({
         meta: { count: 1, limit: 10, offset: 0 },
@@ -135,9 +152,5 @@ export const handlers = [
       });
     }
 
-    return HttpResponse.json(
-      { code: 400, message: `Invalid workspace type: ${type}`, details: [] },
-      { status: 400 }
-    );
   }),
 ];
