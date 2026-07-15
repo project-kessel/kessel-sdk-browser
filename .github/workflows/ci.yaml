@@ -110,6 +110,7 @@ jobs:
     needs: [ci]
     # Only run on push to master branch (never on workflow_dispatch, etc.)
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    environment: npm-publish
     permissions:
       contents: write    # Needed for creating tags and GitHub releases
       issues: write      # Needed for release notes
@@ -120,7 +121,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # Use default GITHUB_TOKEN for authentication (no SSH key needed)
+          token: ${{ secrets.GH_BOT_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -137,3 +138,8 @@ jobs:
 
       - name: Release
         uses: ./.github/actions/release
+        with:
+          gh_token: ${{ secrets.GH_BOT_TOKEN }}
+          gh_name: ${{ secrets.GH_NAME }}
+          gh_email: ${{ secrets.GH_EMAIL }}
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
