@@ -1,17 +1,45 @@
-name: 'Release'
-description: 'Version and publish packages using NX release'
+name: Release job
+description: Version and publish packages using NX release
+inputs:
+  gh_token:
+    description: 'Github token'
+    required: true
+  gh_name:
+    description: 'Github name'
+    required: true
+  gh_email:
+    description: 'Github email'
+    required: true
+  gpg_private_key:
+    description: 'GPG private key for signing commits (passphrase-less)'
+    required: true
 
 runs:
   using: 'composite'
   steps:
+    - name: Import GPG key
+      shell: bash
+      run: |
+        echo "${{ inputs.gpg_private_key }}" | base64 -d | gpg --batch --import
+
     - name: Configure git
       shell: bash
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git config user.name "${{ inputs.gh_name }}"
+        git config user.email "${{ inputs.gh_email }}"
+        git config commit.gpgsign true
+        git config tag.gpgsign true
+        git config user.signingkey $(gpg --list-secret-keys --with-colons "${{ inputs.gh_email }}" | awk -F: '/^sec:/ {print $5; exit}')
+
+    - name: Verify version alignment
+      shell: bash
+      run: ./.github/scripts/verify-versions.sh
 
     - name: Run NX release (version and changelog)
       shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.gh_token }}
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
       run: npx nx release --skip-publish --verbose
 
     - name: Rebuild packages with new versions
@@ -20,16 +48,15 @@ runs:
 
     - name: Push changes and tags
       shell: bash
-      run: |
-        git push
-        git push --tags
+      env:
+        HUSKY: '0'
+      run: git push --follow-tags
 
     - name: Verify built files
       shell: bash
       run: |
         echo "Verifying built files..."
         ls -la dist/packages/*/index.js || (echo "Built files missing!" && exit 1)
-        # Double-check that we're publishing from dist directories
         echo "Checking package.json files in dist..."
         for pkg in dist/packages/*/package.json; do
           echo "=== $pkg ==="
@@ -38,16 +65,14 @@ runs:
 
     - name: Run NX release publish
       shell: bash
-      run: npx nx release publish
       env:
         NPM_CONFIG_PROVENANCE: true
         NPM_CONFIG_LEGACY_PEER_DEPS: false
+      run: npx nx release publish
 
     - name: Tag last-release
       shell: bash
       run: |
         git tag -f last-release
         git push origin last-release --force
-        # push nx created tags
-        git tag -l
         git push origin --tags
