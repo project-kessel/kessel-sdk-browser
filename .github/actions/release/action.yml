@@ -73,6 +73,6 @@ runs:
     - name: Tag last-release
       shell: bash
       run: |
-        git tag -f last-release
+        git tag -f -m "last-release" last-release
         git push origin last-release --force
         git push origin --tags
