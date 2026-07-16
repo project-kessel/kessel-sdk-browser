@@ -1,3 +1,9 @@
+## 0.5.3 (2026-07-16)
+
+### 🩹 Fixes
+
+- do a full release ([3399dff](https://github.com/project-kessel/kessel-sdk-browser/commit/3399dff))
+
 ## 0.5.2 (2026-07-16)
 
 ### 🩹 Fixes
