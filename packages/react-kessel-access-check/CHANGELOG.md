@@ -1,3 +1,9 @@
+## 0.5.2 (2026-07-16)
+
+### 🩹 Fixes
+
+- **react-kessel-access-check:** add with_ancestry=true param when fetching workspace ([bb2227b](https://github.com/project-kessel/kessel-sdk-browser/commit/bb2227b))
+
 ## 0.5.1 (2026-06-04)
 
 This was a version bump only for react-kessel-access-check to align it with other projects, there were no code changes.
