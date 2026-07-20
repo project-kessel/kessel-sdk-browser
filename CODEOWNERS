@@ -1,3 +1,5 @@
+# .github/CODEOWNERS
+
 # Default owners for everything in the repo
 * @project-kessel/hcc-framework
 
@@ -5,8 +7,9 @@
 # This prevents unauthorized modifications to CI/CD pipelines, custom actions, and repo processes
 .github/** @project-kessel/hcc-framework
 
-# All Konflux tekton configuration changes require review from admins
-#.tekton/** @project-kessel/hcc-framework
+# Protect npm configuration and lifecycle scripts from supply chain attacks
+# Root package.json contains prepare/postinstall scripts that execute during npm install
+package.json @project-kessel/hcc-framework
 
 # CODEOWNERS file itself requires admin review to prevent bypass attacks
 # Must come after wildcard so this rule takes precedence (last match wins)
