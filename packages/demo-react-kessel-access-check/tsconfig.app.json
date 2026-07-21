@@ -27,7 +27,9 @@
       "@project-kessel/react-kessel-access-check": [
         "../react-kessel-access-check/src/index.ts"
       ]
-    }
+    },
+    "esModuleInterop": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"]
 }

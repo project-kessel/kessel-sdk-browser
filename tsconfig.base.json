@@ -25,6 +25,11 @@
       "@project-kessel/react-kessel-access-check": [
         "packages/react-kessel-access-check/src/index.ts"
       ]
-    }
+    },
+    "noUncheckedSideEffectImports": false,
+    "types": [
+      "*"
+    ],
+    "ignoreDeprecations": "6.0"
   }
 }

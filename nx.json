@@ -2,7 +2,10 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "defaultBase": "master",
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "sharedGlobals"
+    ],
     "production": [
       "default",
       "!{projectRoot}/src/tests/**/*",
@@ -16,7 +19,9 @@
       "!{projectRoot}/test-setup.[jt]s",
       "!{projectRoot}/setupTests.ts"
     ],
-    "sharedGlobals": ["{workspaceRoot}/.github/workflows/*.yml"]
+    "sharedGlobals": [
+      "{workspaceRoot}/.github/workflows/*.yml"
+    ]
   },
   "plugins": [
     {
@@ -46,25 +51,42 @@
     },
     "@nx/js:tsc": {
       "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "production",
+        "^production"
+      ]
     },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": true
     },
     "test": {
-      "dependsOn": ["^test"],
+      "dependsOn": [
+        "^test"
+      ],
       "cache": true
     },
     "lint": {
-      "dependsOn": ["^lint"],
+      "dependsOn": [
+        "^lint"
+      ],
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/eslint.config.mjs"]
+      "inputs": [
+        "default",
+        "{workspaceRoot}/eslint.config.mjs"
+      ]
     }
   },
   "release": {
-    "projects": ["packages/*", "!demo-*"],
+    "projects": [
+      "packages/*",
+      "!demo-*"
+    ],
     "projectsRelationship": "independent",
     "git": {
       "commit": true,
@@ -95,6 +117,8 @@
         }
       }
     },
-    "releaseTagPattern": "{projectName}@{version}"
+    "releaseTag": {
+      "pattern": "{projectName}@{version}"
+    }
   }
 }
