@@ -25,6 +25,17 @@ jobs:
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Check lockfile sync
+        if: github.event_name == 'pull_request'
+        run: |
+          npm install --package-lock-only
+          if git diff --exit-code package-lock.json; then
+            echo "package-lock.json is in sync"
+          else
+            echo "::error::package-lock.json is out of sync with package.json. Run 'npm install' and commit the updated lockfile."
+            exit 1
+          fi
+
       - name: Install dependencies
         run: npm ci
 
