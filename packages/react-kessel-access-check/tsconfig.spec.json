@@ -3,7 +3,9 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "types": ["jest", "node"],
-    "declarationMap": false
+    "declarationMap": false,
+    "ignoreDeprecations": "6.0",
+    "rootDir": "src"
   },
   "include": [
     "jest.config.js",
