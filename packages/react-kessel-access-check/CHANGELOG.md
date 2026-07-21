@@ -1,3 +1,9 @@
+## 0.5.4 (2026-07-21)
+
+### 🩹 Fixes
+
+- **react-kessel-access-check:** resolve 21+ Dependabot vulnerabilities ([dfc11ca](https://github.com/project-kessel/kessel-sdk-browser/commit/dfc11ca))
+
 ## 0.5.3 (2026-07-16)
 
 ### 🩹 Fixes

@@ -3,7 +3,8 @@
   "compilerOptions": {
     "declaration": true,
     "outDir": "../../dist/packages/react-kessel-access-check",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*"],
   "exclude": [
