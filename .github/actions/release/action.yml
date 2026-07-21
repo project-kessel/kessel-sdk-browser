@@ -42,6 +42,15 @@ runs:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
       run: npx nx release --skip-publish --verbose
 
+    - name: Sync lockfile after version bump
+      shell: bash
+      run: |
+        npm install --package-lock-only
+        if ! git diff --quiet package-lock.json; then
+          git add package-lock.json
+          git commit --amend --no-edit
+        fi
+
     - name: Rebuild packages with new versions
       shell: bash
       run: npx nx run-many -t build --skipNxCache
