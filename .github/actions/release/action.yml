@@ -72,6 +72,13 @@ runs:
           cat "$pkg" | grep -E '"name"|"main"|"types"'
         done
 
+    - name: Upgrade npm for OIDC Trusted Publishing support
+      shell: bash
+      run: npm install -g npm@11
+      # npm v10 (bundled with Node 22) does not support the OIDC handshake
+      # required for Trusted Publishing. npm >=11.5.1 is required.
+      # See: https://github.com/npm/cli/issues/8678
+
     - name: Run NX release publish
       shell: bash
       env:
