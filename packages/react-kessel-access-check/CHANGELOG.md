@@ -1,3 +1,10 @@
+## 0.5.7 (2026-07-22)
+
+### 🩹 Fixes
+
+- upgrade to Node 24 with native npm 11 OIDC support ([#66](https://github.com/project-kessel/kessel-sdk-browser/pull/66))
+- do a release ([#65](https://github.com/project-kessel/kessel-sdk-browser/pull/65))
+
 ## 0.5.6 (2026-07-21)
 
 This was a version bump only for react-kessel-access-check to align it with other projects, there were no code changes.
